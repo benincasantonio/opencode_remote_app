@@ -17,9 +17,9 @@ Details: Create all lib/ subdirectories for core, data, domain, presentation, an
 Acceptance: Directory tree matches AGENTS.md structure. Empty directories include .gitkeep files.
 
 ### P1-03 Create api_constants.dart
-Goal: Centralize API endpoints and timeouts.
-Details: Create lib/core/constants/api_constants.dart. Define ApiConstants with default host 127.0.0.1 and port 4096. Add OpenCode endpoints: /global/health, /event, /session, /session/:id, /session/:id/message, /session/:id/prompt_async, /file, /file/content, /find, /find/file, /config, /provider, /agent, /auth/:id, /project/current. Add Rust notifier endpoints: /devices/register, /devices/:token, /health. Add timeouts (connect, receive) and SSE reconnect delay constants.
-Acceptance: ApiConstants exposes all endpoints and timeouts as static constants. File compiles with no unused imports.
+Goal: Centralize API connection defaults and timeouts.
+Details: Create lib/core/constants/api_constants.dart. Define ApiConstants with default host 127.0.0.1 and port 4096. Add timeouts (connect, receive, send) and SSE reconnect delay constants. Endpoint paths will be defined in the API client datasources when implemented.
+Acceptance: ApiConstants exposes connection defaults and timeouts as static constants. File compiles with no unused imports.
 
 ### P1-04 Create app_constants.dart
 Goal: Define app-wide constants.
