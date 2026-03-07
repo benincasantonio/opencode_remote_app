@@ -292,25 +292,25 @@ dependencies:
   flutter:
     sdk: flutter
   # State Management
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
   # Networking
   dio: ^5.7.0
   # Routing
-  go_router: ^14.8.1
+  go_router: ^17.1.0
   # Firebase
-  firebase_core: ^3.12.1
-  firebase_messaging: ^15.2.4
+  firebase_core: ^4.5.0
+  firebase_messaging: ^16.1.2
   # Data Classes
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   # mDNS Discovery
-  bonsoir: ^5.1.4
+  bonsoir: ^6.0.2
   # Local Storage
   shared_preferences: ^2.3.5
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^10.0.0
   # UI
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.2
   flutter_markdown: ^0.7.7
   flutter_syntax_view: ^4.0.0
   cupertino_icons: ^1.0.8
@@ -319,10 +319,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.4.14
-  riverpod_generator: ^2.6.3
-  freezed: ^2.5.8
-  json_serializable: ^6.9.4
+  build_runner: ^2.12.2
+  riverpod_generator: ^4.0.0+1
+  freezed: ^3.2.3
+  json_serializable: ^6.11.2
   custom_lint:
   riverpod_lint:
 ```
