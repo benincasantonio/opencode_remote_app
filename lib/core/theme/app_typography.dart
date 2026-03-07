@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTypography {
   AppTypography._();
 
-  static final String _fontFamily =
-      GoogleFonts.jetBrainsMono().fontFamily ?? 'monospace';
+  static const String _fontFamily = 'JetBrains Mono';
 
   static final TextStyle headlineLarge = TextStyle(
     fontFamily: _fontFamily,

@@ -8,7 +8,7 @@ Testing policy: Unit and integration tests are important from the beginning and 
 
 ### P1-01 Update pubspec dependencies
 Goal: Add all required packages for the app.
-Details: Add runtime deps (flutter_riverpod, riverpod_annotation, dio, go_router, firebase_core, firebase_messaging, freezed_annotation, json_annotation, bonsoir, shared_preferences, flutter_secure_storage, google_fonts, flutter_markdown, flutter_syntax_view, cupertino_icons). Add dev deps (flutter_lints, build_runner, riverpod_generator, freezed, json_serializable, custom_lint, riverpod_lint). Run flutter pub get.
+Details: Add runtime deps (flutter_riverpod, riverpod_annotation, dio, go_router, firebase_core, firebase_messaging, freezed_annotation, json_annotation, bonsoir, shared_preferences, flutter_secure_storage, flutter_markdown, flutter_syntax_view, cupertino_icons). Add dev deps (flutter_lints, build_runner, riverpod_generator, freezed, json_serializable, custom_lint, riverpod_lint). Run flutter pub get.
 Acceptance: pubspec.yaml contains all dependencies with versions from AGENTS.md. pubspec.lock updated by flutter pub get. flutter pub get completes without errors.
 
 ### P1-02 Scaffold folder structure
