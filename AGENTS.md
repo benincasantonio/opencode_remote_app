@@ -310,7 +310,6 @@ dependencies:
   shared_preferences: ^2.3.5
   flutter_secure_storage: ^10.0.0
   # UI
-  google_fonts: ^8.0.2
   flutter_markdown: ^0.7.7
   flutter_syntax_view: ^4.0.0
   cupertino_icons: ^1.0.8
