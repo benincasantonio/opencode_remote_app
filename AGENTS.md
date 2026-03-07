@@ -37,7 +37,7 @@ A companion Rust notification server runs locally alongside the OpenCode server.
 | SSE (real-time) | Dio streaming or eventsource_client |
 | Code Generation | build_runner, riverpod_generator, freezed, json_serializable |
 | Service Discovery | nsd / bonsoir (mDNS/DNS-SD) |
-| Local Storage | shared_preferences or hive (for server configs, tokens) |
+| Local Storage | flutter_secure_storage for credentials, shared_preferences for saved servers and lightweight flags |
 | Theme | Dark terminal-like aesthetic |
 
 ### Rust Notification Server
@@ -74,20 +74,10 @@ lib/
 │
 ├── data/
 │   ├── models/                   # Freezed data classes matching OpenCode API types
-│   │   ├── session.dart          # Session, SessionStatus
-│   │   ├── message.dart          # Message, Part (text, tool_use, tool_result, etc.)
-│   │   ├── project.dart          # Project
-│   │   ├── config.dart           # Config, Provider
-│   │   ├── file_node.dart        # FileNode, FileContent
-│   │   ├── agent.dart            # Agent
-│   │   ├── server_health.dart    # Health response
-│   │   ├── server_event.dart     # SSE event types
-│   │   └── notification_token.dart # FCM token registration
-│   │
 │   ├── datasources/
 │   │   ├── opencode_api.dart     # Dio-based HTTP client for OpenCode server
 │   │   ├── sse_client.dart       # SSE event stream client
-│   │   └── local_storage.dart    # Persisted server configs, connection history
+│   │   └── local_storage.dart    # Persisted server configs, connection history, credentials
 │   │
 │   └── repositories/
 │       ├── session_repository.dart
@@ -112,13 +102,23 @@ lib/
 │   ├── router/
 │   │   └── app_router.dart       # GoRouter route definitions
 │   │
-│   ├── widgets/                  # Shared/reusable widgets
-│   │   ├── terminal_text.dart    # Monospace styled text widget
-│   │   ├── code_block.dart       # Syntax-highlighted code block
-│   │   ├── loading_indicator.dart
-│   │   ├── error_widget.dart
-│   │   ├── connection_badge.dart # Shows connected/disconnected status
-│   │   └── markdown_renderer.dart # Render markdown from AI responses
+│   ├── widgets/                  # UI building blocks (one folder per widget)
+│   │   ├── terminal_text/
+│   │   │   └── terminal_text.dart
+│   │   ├── code_block/
+│   │   │   └── code_block.dart
+│   │   ├── loading_indicator/
+│   │   │   └── loading_indicator.dart
+│   │   ├── app_error_widget/
+│   │   │   └── app_error_widget.dart
+│   │   ├── connection_badge/
+│   │   │   └── connection_badge.dart
+│   │   ├── markdown_renderer/
+│   │   │   └── markdown_renderer.dart
+│   │   ├── app_bar/
+│   │   │   └── app_bar.dart
+│   │   └── app_button/
+│   │       └── app_button.dart
 │   │
 │   ├── screens/
 │   │   ├── splash/
@@ -333,11 +333,12 @@ dev_dependencies:
 - Class naming: PascalCase
 - Private members: prefix with _
 - Models: Use freezed + json_serializable for all API models
+- Local storage: shared_preferences for lightweight flags, flutter_secure_storage for credentials
 - Providers: Use @riverpod annotation for all providers; generate with dart run build_runner build
 - Error handling: All Dio calls wrapped in try/catch, map to AppException subtypes
 - Null safety: Strict null safety, avoid ! operator
 - Imports: Prefer relative imports within lib/, absolute for packages
-- Tests: Unit tests for repositories and providers, widget tests for screens
+- Tests: Unit, widget, and integration tests added alongside features
 
 ## Build & Run Commands
 
@@ -360,12 +361,44 @@ cargo run -- --config config.toml
 3. API layer: Dio-based data sources for all endpoints
 4. Repositories: Repository pattern wrapping data sources
 5. Riverpod providers: Generated providers for all state
-6. Connect screen: Server connection (manual + mDNS discovery)
-7. Home screen: Dashboard with health status
-8. Session management: List, create, delete sessions
-9. Chat screen: Message display, prompt input, part rendering
-10. SSE integration: Real-time event streaming
-11. File browser: Directory listing, file viewing
-12. Firebase + Rust notifier: FCM integration and notification server
-13. Settings: Server config management, theme options
-14. Polish: Error handling, loading states, animations, haptics
+6. UI building blocks: Widgets in presentation/widgets
+7. Connect screen: Server connection (manual + mDNS discovery)
+8. Home screen: Dashboard with health status
+9. Session management: List, create, delete sessions
+10. Chat screen: Message display, prompt input, part rendering
+11. SSE integration: Real-time event streaming
+12. File browser: Directory listing, file viewing
+13. Firebase + Rust notifier: FCM integration and notification server
+14. Settings: Server config management, theme options
+15. Polish: Error handling, loading states, animations, haptics
+## Data Flow & Repository Pattern
+
+The app follows a repository pattern where Riverpod providers consume repositories and repositories orchestrate both network and local cache layers.
+
+```
+OpenCode Server (HTTP/SSE)
+    ↓
+Datasources (Dio / SSE / Local storage)
+    ↓
+Models (Freezed DTOs)
+    ↓
+Repositories (network orchestration)
+    ↓
+Riverpod Providers (@riverpod)
+    ↓
+UI (screens + widgets)
+```
+
+Guidelines:
+- Repositories orchestrate network calls and local storage for saved servers and credentials.
+- Providers expose AsyncValue<T> and stay UI-focused; no networking in widgets.
+- The OpenCode server is the source of truth; DTOs are immutable Freezed models.
+
+## Testing Strategy
+
+Testing starts from day one. Unit and integration tests are important from the beginning and are added alongside each feature, not deferred to the end.
+
+- Unit tests: Models, repositories, and providers using mocked datasources, written in the same phase as the code
+- Widget tests: Reusable widgets and key screens with provider overrides as they are built
+- Integration tests: Start early for core flows (connect → chat) and expand to notifications and deep links
+- Phase 15: Test coverage audit, edge cases, and stabilization hardening
