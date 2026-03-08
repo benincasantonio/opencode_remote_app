@@ -1,4 +1,4 @@
-.PHONY: generate generate-clean android android-debug android-release android-appbundle ios clean install format analyze test widgetbook-generate help
+.PHONY: generate generate-clean android android-debug android-release android-appbundle ios clean install format analyze test test-quick test-unit test-widget widgetbook-generate help
 
 generate:
 	@echo "Generating files with build_runner..."
@@ -54,8 +54,20 @@ analyze:
 	flutter analyze
 
 test:
-	@echo "Running tests..."
-	flutter test
+	@echo "Running all tests..."
+	flutter test --concurrency
+
+test-quick:
+	@echo "Running tests in quick mode (no coverage)..."
+	flutter test --concurrency --no-pub
+
+test-unit:
+	@echo "Running unit tests only..."
+	flutter test test/unit --concurrency
+
+test-widget:
+	@echo "Running widget tests only..."
+	flutter test test/widget --concurrency
 
 help:
 	@echo "Available targets:"
@@ -76,8 +88,13 @@ help:
 	@echo "  make install           - Install dependencies"
 	@echo "  make format            - Format Dart files"
 	@echo "  make analyze           - Analyze Dart files"
-	@echo "  make test             - Run tests"
-	@echo "  make clean            - Clean Flutter build and generated files"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test             - Run all tests (with concurrency)"
+	@echo "  make test-quick       - Run tests in quick mode (no pub get)"
+	@echo "  make test-unit        - Run unit tests only"
+	@echo "  make test-widget      - Run widget tests only"
 	@echo ""
 	@echo "Other:"
+	@echo "  make clean            - Clean Flutter build and generated files"
 	@echo "  make help             - Show this help message"
