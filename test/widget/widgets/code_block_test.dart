@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block.dart';
+import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_copy_button.dart';
+import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_content.dart';
 
 void main() {
   group('CodeBlock', () {
@@ -24,6 +26,7 @@ void main() {
         ),
       );
 
+      expect(find.byType(CodeBlockCopyButton), findsOneWidget);
       expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
     });
 
@@ -34,12 +37,12 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+      expect(find.byType(CodeBlockCopyButton), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.copy_rounded));
+      await tester.tap(find.byType(CodeBlockCopyButton));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+      expect(find.byType(CodeBlockCopyButton), findsOneWidget);
     });
 
     testWidgets('copy button copies code to clipboard', (
@@ -52,7 +55,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.copy_rounded));
+      await tester.tap(find.byType(CodeBlockCopyButton));
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -155,6 +158,121 @@ line 10
         ),
         isTrue,
       );
+    });
+  });
+
+  group('CodeBlockContent', () {
+    testWidgets('renders SyntaxView', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: CodeBlockContent(
+              code: 'test',
+              language: Syntax.DART,
+              showLineNumbers: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(SyntaxView), findsOneWidget);
+    });
+
+    testWidgets('applies maxHeight constraint', (WidgetTester tester) async {
+      const maxHeight = 100.0;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: CodeBlockContent(
+              code: 'test',
+              language: Syntax.DART,
+              showLineNumbers: true,
+              maxHeight: maxHeight,
+            ),
+          ),
+        ),
+      );
+
+      final constrainedBoxFinder = find.byType(ConstrainedBox);
+      expect(constrainedBoxFinder, findsOneWidget);
+
+      final constrainedBox =
+          tester.widget(constrainedBoxFinder) as ConstrainedBox;
+      expect(constrainedBox.constraints.maxHeight, maxHeight);
+    });
+
+    testWidgets('horizontal scrolling present', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: CodeBlockContent(
+              code: 'test',
+              language: Syntax.DART,
+              showLineNumbers: true,
+            ),
+          ),
+        ),
+      );
+
+      final horizontalScrollFinder = find.byType(SingleChildScrollView);
+      final horizontalScrolls = tester
+          .widgetList(horizontalScrollFinder)
+          .whereType<SingleChildScrollView>();
+
+      expect(
+        horizontalScrolls.any(
+          (scroll) => scroll.scrollDirection == Axis.horizontal,
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('CodeBlockCopyButton', () {
+    testWidgets('renders copy icon', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: CodeBlockCopyButton(code: 'test')),
+        ),
+      );
+
+      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+    });
+
+    testWidgets('copies text to clipboard', (WidgetTester tester) async {
+      const testCode = 'test code';
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: CodeBlockCopyButton(code: testCode)),
+        ),
+      );
+
+      await tester.tap(find.byType(CodeBlockCopyButton));
+      await tester.pumpAndSettle();
+
+      final clipboardData = await Clipboard.getData('text/plain');
+      expect(clipboardData?.text, testCode);
+    });
+
+    testWidgets('shows check icon after copy', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: CodeBlockCopyButton(code: 'test')),
+        ),
+      );
+
+      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+
+      await tester.tap(find.byType(CodeBlockCopyButton));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.check_rounded), findsNothing);
+      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
     });
   });
 }
