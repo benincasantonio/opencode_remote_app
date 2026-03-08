@@ -339,6 +339,18 @@ dev_dependencies:
 - Imports: Prefer relative imports within lib/, absolute for packages
 - Tests: Unit, widget, and integration tests added alongside features
 
+### Widget Conventions
+
+- **One widget per file**: Each widget class should be in its own file
+- **No widget-returning methods**: Do not create methods that return widgets. Instead:
+  - Use const constructors for static widgets
+  - Extract complex UI to separate widget classes
+  - Inline simple widget structures directly in the build method
+- **Widget structure**: Each widget should have a build method and use const constructors where possible. Avoid helper methods that return widgets.
+- **Helper widgets**: Private helper widgets should be in separate files with a leading underscore (e.g., `_helper_widget.dart`) to prevent export from main app.
+- **UI constants**: Theme-related constants (like SyntaxTheme, decoration styles) should be in `core/constants/` directory, not in widget files.
+- **Widget directories**: Each widget gets its own folder with the widget file as the main export (e.g., `lib/presentation/widgets/code_block/code_block.dart`). Helper widgets in the same feature should have their own files in the same directory.
+
 ## Build & Run Commands
 
 ```bash
