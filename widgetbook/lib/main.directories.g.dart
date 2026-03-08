@@ -11,5 +11,33 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
+import 'package:widgetbook_workspace/code_block_use_case.dart'
+    as _widgetbook_workspace_code_block_use_case;
 
-final directories = <_widgetbook.WidgetbookNode>[];
+final directories = <_widgetbook.WidgetbookNode>[
+  _widgetbook.WidgetbookFolder(
+    name: 'presentation',
+    children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'widgets',
+        children: [
+          _widgetbook.WidgetbookFolder(
+            name: 'code_block',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'CodeBlock',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Default',
+                    builder: _widgetbook_workspace_code_block_use_case
+                        .defaultCodeBlock,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  ),
+];
