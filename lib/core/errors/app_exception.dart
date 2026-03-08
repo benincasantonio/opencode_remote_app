@@ -38,11 +38,8 @@ class ServerException extends AppException {
 
 /// 401 / 403 responses or missing credentials.
 class AuthException extends AppException {
-  const AuthException(
-    String message, {
-    this.statusCode,
-    StackTrace? stackTrace,
-  }) : super(message, stackTrace);
+  const AuthException(String message, {this.statusCode, StackTrace? stackTrace})
+    : super(message, stackTrace);
 
   /// HTTP status code (401 or 403), if the exception originated from a
   /// server response. `null` when the error is client-side (e.g. missing
@@ -64,11 +61,8 @@ class TimeoutException extends AppException {
 
 /// JSON deserialization or model parsing failure.
 class ParseException extends AppException {
-  const ParseException(
-    String message, {
-    this.source,
-    StackTrace? stackTrace,
-  }) : super(message, stackTrace);
+  const ParseException(String message, {this.source, StackTrace? stackTrace})
+    : super(message, stackTrace);
 
   /// The raw string / payload that failed to parse.
   final String? source;
