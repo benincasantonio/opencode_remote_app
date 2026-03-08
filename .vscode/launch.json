@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "opencode_remote_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "opencode_remote_app (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "opencode_remote_app (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "widgetbook (macOS)",
+            "cwd": "widgetbook",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "widgetbook (web)",
+            "cwd": "widgetbook",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-d", "chrome"]
+        }
+    ]
+}
