@@ -55,19 +55,15 @@ analyze:
 
 test:
 	@echo "Running all tests..."
-	flutter test --concurrency
-
-test-quick:
-	@echo "Running tests in quick mode (no coverage)..."
-	flutter test --concurrency --no-pub
+	flutter test
 
 test-unit:
 	@echo "Running unit tests only..."
-	flutter test test/unit --concurrency
+	flutter test test/unit
 
 test-widget:
 	@echo "Running widget tests only..."
-	flutter test test/widget --concurrency
+	flutter test test/widget
 
 help:
 	@echo "Available targets:"
@@ -90,7 +86,7 @@ help:
 	@echo "  make analyze           - Analyze Dart files"
 	@echo ""
 	@echo "Testing:"
-	@echo "  make test             - Run all tests (with concurrency)"
+	@echo "  make test             - Run all tests"
 	@echo "  make test-quick       - Run tests in quick mode (no pub get)"
 	@echo "  make test-unit        - Run unit tests only"
 	@echo "  make test-widget      - Run widget tests only"
