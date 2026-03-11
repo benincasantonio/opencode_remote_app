@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
+import 'presentation/widgets/app_bar/terminal_app_bar.dart';
 
 void main() {
   runApp(const App());
@@ -23,9 +24,9 @@ class PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('OpenCode Remote')),
-      body: const Center(child: Text('OpenCode Remote App')),
+    return const Scaffold(
+      appBar: TerminalAppBar(title: 'OpenCode Remote'),
+      body: Center(child: Text('OpenCode Remote App')),
     );
   }
 }
