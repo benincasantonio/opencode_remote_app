@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_sizing.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
@@ -30,7 +31,7 @@ class AppTheme {
         color: AppColors.surfaceVariant,
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
           side: BorderSide(color: AppColors.border),
         ),
       ),
@@ -38,34 +39,38 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceVariant,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
           borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
           borderSide: BorderSide(color: AppColors.primaryGreen),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
           borderSide: BorderSide(color: AppColors.border),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
+          horizontal: AppSizing.gapLarge,
+          vertical: AppSizing.gapMedium,
         ),
       ),
       dividerTheme: DividerThemeData(color: AppColors.border, thickness: 1),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surfaceVariant,
         contentTextStyle: AppTypography.bodyLarge,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
+        ),
         behavior: SnackBarBehavior.floating,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
+        ),
       ),
       textTheme: TextTheme(
         displayLarge: AppTypography.headlineLarge,

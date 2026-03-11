@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
+import 'package:opencode_remote_app/core/constants/app_sizing.dart';
 import 'package:opencode_remote_app/core/theme/app_colors.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_content.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_copy_button.dart';
@@ -24,7 +25,7 @@ class CodeBlock extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
         border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizing.radiusMedium),
       ),
       child: Stack(
         children: [
@@ -34,7 +35,11 @@ class CodeBlock extends StatelessWidget {
             showLineNumbers: showLineNumbers,
             maxHeight: maxHeight,
           ),
-          Positioned(top: 8, right: 8, child: CodeBlockCopyButton(code: code)),
+          Positioned(
+            top: AppSizing.gapSmall,
+            right: AppSizing.gapSmall,
+            child: CodeBlockCopyButton(code: code),
+          ),
         ],
       ),
     );
