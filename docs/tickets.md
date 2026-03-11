@@ -113,6 +113,12 @@ Goal: Validate core UI components early.
 Details: Add widget tests for TerminalText, ConnectionBadge, AppButton, AppErrorWidget, and LoadingIndicator with key props and interactions.
 Acceptance: Widget tests pass for all building blocks.
 
+### P2-10 Create error display system
+Goal: Show meaningful, consistent errors to users across the app.
+Details: Create lib/presentation/widgets/app_error_snackbar/app_error_snackbar.dart to render AppException messages in a terminal-styled SnackBar with icon, message, retry action, and an optional View Details expansion. Create lib/core/errors/app_exception_ext.dart to map AppException types to user-friendly copy, severity, icons, retry capability, and a details string (include stackTrace and ServerException.responseBody when available). Create lib/core/errors/error_display_service.dart to centralize SnackBar display via ScaffoldMessenger and choose ephemeral vs persistent behavior based on severity (auth/server critical -> persistent, network/timeout -> auto-dismiss). Update lib/core/errors/errors.dart barrel exports.
+Acceptance: Error snackbars render with correct icon/message; retry and details actions work; severity drives persistence; mapping covers all AppException subtypes; analyzer passes.
+Testing: Add unit tests for AppException mapping (message, severity, details). Add widget tests for AppErrorSnackBar rendering, retry action callback, and details expansion.
+
 ## Phase 3 - Services Layer
 
 ### P3-01 Create Dio client service
