@@ -1,0 +1,1 @@
+enum LoadingIndicatorSize { small, large }
