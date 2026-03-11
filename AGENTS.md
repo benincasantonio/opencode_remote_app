@@ -349,8 +349,38 @@ dev_dependencies:
 - **Widget structure**: Each widget should have a build method and use const constructors where possible. Avoid helper methods that return widgets.
 - **Helper widgets**: Private helper widgets should be in separate files with a leading underscore (e.g., `_helper_widget.dart`) to prevent export from main app.
 - **UI constants**: Theme-related constants (like SyntaxTheme, decoration styles) should be in `core/constants/` directory, not in widget files.
-- **Widget directories**: Each widget gets its own folder with the widget file as the main export (e.g., `lib/presentation/widgets/code_block/code_block.dart`). Helper widgets in the same feature should have their own files in the same directory.
+- **Widget directories**: Each widget gets its own folder with a widget file as the main export (e.g., `lib/presentation/widgets/code_block/code_block.dart`). Helper widgets in the same feature should have their own files in the same directory.
+ 
+## Project Patterns & Learnings
 
+### Enum Location Policy
+- **Co-location with widgets**: Enums are co-located with their consuming widgets (e.g., `ConnectionStatus` in `connection_badge/`, `LoadingIndicatorSize` in `loading_indicator/`)
+- **Rationale**: Avoids creating a separate `enums/` folder; keeps related types together with their widgets
+
+### Widget Testing Standards
+- **Coverage**: Comprehensive test coverage for all widgets (~7 tests per widget)
+- **Test types**: Widget presence, text rendering, color verification, size validation, interaction testing
+- **Test location**: `test/widget/presentation/widgets/{widget}_test.dart`
+- **Verification**: Always run `flutter test` + `flutter analyze` after implementation
+
+### Constants Usage Pattern
+- **AppSizing class**: Centralized sizing constants in `lib/core/constants/app_sizing.dart`
+- **No magic numbers**: All spacing/gaps/radius/icon values use `AppSizing.gap*`, `AppSizing.radius*`, `AppSizing.icon*`, `AppSizing.dotSize`
+- **Benefits**: Single source of truth for sizing changes, consistent spacing across app
+
+### Widgetbook Workflow
+- **Use cases**: Create `widgetbook/lib/{widget}_use_case.dart` for each widget
+- **Knob types**: `context.knobs.object.dropdown<T>()` (not deprecated `list`), `context.knobs.stringOrNull()`, `context.knobs.boolean()`
+- **Regeneration**: `cd widgetbook && dart run build_runner build --delete-conflicting-outputs` after adding use cases
+- **Pattern**: Regenerates `main.directories.g.dart` to register new use cases
+
+### Codegen Pattern
+- **Freezed + JSON**: `freezed_annotation` + `json_annotation` packages
+- **Riverpod**: `@riverpod` annotation with codegen
+- **Generation**: `dart run build_runner build --delete-conflicting-outputs`
+- **File location**: Generated files (`.g.dart`) are created in same directory as source files
+- **Usage**: Providers use generated classes, models use `.fromJson`/`.toJson()`
+ 
 ## Build & Run Commands
 
 ```bash
