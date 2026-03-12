@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block.dart';
