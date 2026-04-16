@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'core/theme/app_theme.dart';
-import 'presentation/widgets/app_bar/terminal_app_bar.dart';
+import 'presentation/screens/connect/discovery_debug_screen.dart';
 
 void main() {
   runApp(const App());
@@ -14,19 +15,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'OpenCode Remote',
       theme: AppTheme.dark(),
-      home: const PlaceholderScreen(),
-    );
-  }
-}
-
-class PlaceholderScreen extends StatelessWidget {
-  const PlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: TerminalAppBar(title: 'OpenCode Remote'),
-      body: Center(child: Text('OpenCode Remote App')),
+      home: const DiscoveryDebugScreen(),
     );
   }
 }
