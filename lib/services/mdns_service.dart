@@ -71,7 +71,6 @@ class MdnsService {
 
     try {
       await discovery.initialize();
-      await discovery.start();
     } catch (error, stackTrace) {
       Logger.error(
         'mDNS discovery failed to start',
@@ -90,6 +89,11 @@ class MdnsService {
     final stream = discovery.eventStream;
     if (stream == null) {
       Logger.warning('mDNS discovery eventStream is null');
+      _isDiscovering = false;
+      _discovery = null;
+      _controller.addError(
+        const NetworkException('mDNS discovery event stream is unavailable'),
+      );
       return;
     }
 
@@ -107,6 +111,24 @@ class MdnsService {
         );
       },
     );
+
+    try {
+      await discovery.start();
+    } catch (error, stackTrace) {
+      Logger.error(
+        'mDNS discovery failed to start',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      _isDiscovering = false;
+      await _subscription?.cancel();
+      _subscription = null;
+      _discovery = null;
+      _controller.addError(
+        NetworkException('mDNS discovery failed to start: $error', stackTrace),
+        stackTrace,
+      );
+    }
   }
 
   void _handleEvent(BonsoirDiscoveryEvent event) {

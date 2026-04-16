@@ -78,31 +78,40 @@ void main() {
         await fake.subscribedCompleter.future;
         expect(fake.initializeCalled, isTrue);
         expect(fake.startCalled, isTrue);
+        expect(fake.callOrder, containsAllInOrder(['initialize', 'start']));
+      });
+
+      test('subscribes to event stream before starting discovery', () async {
+        service.startDiscovery();
+        await fake.subscribedCompleter.future;
+
         expect(
           fake.callOrder,
-          containsAllInOrder(['initialize', 'start']),
+          containsAllInOrder(['initialize', 'listen', 'start']),
         );
       });
 
-      test('returns a broadcast stream (multiple listeners receive events)',
-          () async {
-        final stream = service.startDiscovery();
-        await fake.subscribedCompleter.future;
+      test(
+        'returns a broadcast stream (multiple listeners receive events)',
+        () async {
+          final stream = service.startDiscovery();
+          await fake.subscribedCompleter.future;
 
-        final snapshotsA = <List<DiscoveredServer>>[];
-        final snapshotsB = <List<DiscoveredServer>>[];
-        final subA = stream.listen(snapshotsA.add);
-        final subB = stream.listen(snapshotsB.add);
+          final snapshotsA = <List<DiscoveredServer>>[];
+          final snapshotsB = <List<DiscoveredServer>>[];
+          final subA = stream.listen(snapshotsA.add);
+          final subB = stream.listen(snapshotsB.add);
 
-        fake.emit(_resolved('svc', '10.0.0.1', 4096));
-        await _pump();
+          fake.emit(_resolved('svc', '10.0.0.1', 4096));
+          await _pump();
 
-        expect(snapshotsA, hasLength(1));
-        expect(snapshotsB, hasLength(1));
+          expect(snapshotsA, hasLength(1));
+          expect(snapshotsB, hasLength(1));
 
-        await subA.cancel();
-        await subB.cancel();
-      });
+          await subA.cancel();
+          await subB.cancel();
+        },
+      );
 
       test('sets isDiscovering to true', () async {
         service.startDiscovery();
@@ -110,33 +119,38 @@ void main() {
         expect(service.isDiscovering, isTrue);
       });
 
-      test('a second call returns the same broadcast stream (idempotent)',
-          () async {
-        final a = service.startDiscovery();
-        await fake.subscribedCompleter.future;
-        final b = service.startDiscovery();
-        expect(identical(a, b), isTrue);
-        expect(fake.initializeCallCount, 1);
-        expect(fake.startCallCount, 1);
-      });
+      test(
+        'a second call returns the same broadcast stream (idempotent)',
+        () async {
+          final a = service.startDiscovery();
+          await fake.subscribedCompleter.future;
+          final b = service.startDiscovery();
+          expect(identical(a, b), isTrue);
+          expect(fake.initializeCallCount, 1);
+          expect(fake.startCallCount, 1);
+        },
+      );
 
       test('emits NetworkException on stream when initialize fails', () async {
         fake.throwOnInitialize = Exception('init-boom');
         final stream = service.startDiscovery();
-        await expectLater(
-          stream,
-          emitsError(isA<NetworkException>()),
-        );
+        await expectLater(stream, emitsError(isA<NetworkException>()));
         expect(service.isDiscovering, isFalse);
       });
 
       test('emits NetworkException on stream when start fails', () async {
         fake.throwOnStart = Exception('start-boom');
         final stream = service.startDiscovery();
-        await expectLater(
-          stream,
-          emitsError(isA<NetworkException>()),
-        );
+        await expectLater(stream, emitsError(isA<NetworkException>()));
+        expect(service.isDiscovering, isFalse);
+      });
+
+      test('emits NetworkException when eventStream is unavailable', () async {
+        fake.exposeEventStream = false;
+        final stream = service.startDiscovery();
+
+        await expectLater(stream, emitsError(isA<NetworkException>()));
+
         expect(service.isDiscovering, isFalse);
       });
 
@@ -155,7 +169,7 @@ void main() {
           BonsoirDiscoveryServiceFoundEvent(
             service: BonsoirService.ignoreNorms(
               name: 'svc',
-              type: '_opencode._tcp',
+              type: '_http._tcp',
               port: 4096,
             ),
           ),
@@ -181,35 +195,31 @@ void main() {
         await sub.cancel();
       });
 
-      test('ServiceResolvedEvent with same key replaces existing entry',
-          () async {
-        service.startDiscovery();
-        await fake.subscribedCompleter.future;
+      test(
+        'ServiceResolvedEvent with same key replaces existing entry',
+        () async {
+          service.startDiscovery();
+          await fake.subscribedCompleter.future;
 
-        fake.emit(
-          _resolved('svc', '10.0.0.1', 4096, attributes: {'v': '1'}),
-        );
-        fake.emit(
-          _resolved('svc', '10.0.0.1', 4096, attributes: {'v': '2'}),
-        );
-        await _pump();
+          fake.emit(_resolved('svc', '10.0.0.1', 4096, attributes: {'v': '1'}));
+          fake.emit(_resolved('svc', '10.0.0.1', 4096, attributes: {'v': '2'}));
+          await _pump();
 
-        expect(service.discoveredServers, hasLength(1));
-        expect(service.discoveredServers.single.attributes['v'], '2');
-      });
+          expect(service.discoveredServers, hasLength(1));
+          expect(service.discoveredServers.single.attributes['v'], '2');
+        },
+      );
 
       test('ServiceUpdatedEvent with resolved host updates entry', () async {
         service.startDiscovery();
         await fake.subscribedCompleter.future;
 
-        fake.emit(
-          _resolved('svc', '10.0.0.1', 4096, attributes: {'v': '1'}),
-        );
+        fake.emit(_resolved('svc', '10.0.0.1', 4096, attributes: {'v': '1'}));
         fake.emit(
           BonsoirDiscoveryServiceUpdatedEvent(
             service: BonsoirService.ignoreNorms(
               name: 'svc',
-              type: '_opencode._tcp',
+              type: '_http._tcp',
               host: '10.0.0.1',
               port: 4096,
               attributes: const {'v': '2'},
@@ -229,7 +239,7 @@ void main() {
           BonsoirDiscoveryServiceUpdatedEvent(
             service: BonsoirService.ignoreNorms(
               name: 'svc',
-              type: '_opencode._tcp',
+              type: '_http._tcp',
               port: 4096,
             ),
           ),
@@ -239,48 +249,52 @@ void main() {
         expect(service.discoveredServers, isEmpty);
       });
 
-      test('ServiceLostEvent removes the entry and emits an empty snapshot',
-          () async {
-        service.startDiscovery();
-        await fake.subscribedCompleter.future;
-        fake.emit(_resolved('svc', '10.0.0.1', 4096));
-        await _pump();
+      test(
+        'ServiceLostEvent removes the entry and emits an empty snapshot',
+        () async {
+          service.startDiscovery();
+          await fake.subscribedCompleter.future;
+          fake.emit(_resolved('svc', '10.0.0.1', 4096));
+          await _pump();
 
-        fake.emit(
-          BonsoirDiscoveryServiceLostEvent(
-            service: BonsoirService.ignoreNorms(
-              name: 'svc',
-              type: '_opencode._tcp',
-              host: '10.0.0.1',
-              port: 4096,
+          fake.emit(
+            BonsoirDiscoveryServiceLostEvent(
+              service: BonsoirService.ignoreNorms(
+                name: 'svc',
+                type: '_http._tcp',
+                host: '10.0.0.1',
+                port: 4096,
+              ),
             ),
-          ),
-        );
-        await _pump();
+          );
+          await _pump();
 
-        expect(service.discoveredServers, isEmpty);
-      });
+          expect(service.discoveredServers, isEmpty);
+        },
+      );
 
-      test('ServiceLostEvent with null host falls back to name+port match',
-          () async {
-        service.startDiscovery();
-        await fake.subscribedCompleter.future;
-        fake.emit(_resolved('svc', '10.0.0.1', 4096));
-        await _pump();
+      test(
+        'ServiceLostEvent with null host falls back to name+port match',
+        () async {
+          service.startDiscovery();
+          await fake.subscribedCompleter.future;
+          fake.emit(_resolved('svc', '10.0.0.1', 4096));
+          await _pump();
 
-        fake.emit(
-          BonsoirDiscoveryServiceLostEvent(
-            service: BonsoirService.ignoreNorms(
-              name: 'svc',
-              type: '_opencode._tcp',
-              port: 4096,
+          fake.emit(
+            BonsoirDiscoveryServiceLostEvent(
+              service: BonsoirService.ignoreNorms(
+                name: 'svc',
+                type: '_http._tcp',
+                port: 4096,
+              ),
             ),
-          ),
-        );
-        await _pump();
+          );
+          await _pump();
 
-        expect(service.discoveredServers, isEmpty);
-      });
+          expect(service.discoveredServers, isEmpty);
+        },
+      );
 
       test('ServiceLostEvent for unknown service is a no-op', () async {
         service.startDiscovery();
@@ -292,7 +306,7 @@ void main() {
           BonsoirDiscoveryServiceLostEvent(
             service: BonsoirService.ignoreNorms(
               name: 'unknown',
-              type: '_opencode._tcp',
+              type: '_http._tcp',
               host: '10.0.0.9',
               port: 4096,
             ),
@@ -326,10 +340,7 @@ void main() {
       test('stream onError is forwarded via NetworkException', () async {
         final stream = service.startDiscovery();
         final errors = <Object>[];
-        final sub = stream.listen(
-          (_) {},
-          onError: errors.add,
-        );
+        final sub = stream.listen((_) {}, onError: errors.add);
         await fake.subscribedCompleter.future;
 
         fake.emitError(Exception('underlying-stream-boom'));
@@ -343,16 +354,18 @@ void main() {
     });
 
     group('stopDiscovery', () {
-      test('calls stop on the discovery and flips isDiscovering to false',
-          () async {
-        service.startDiscovery();
-        await fake.subscribedCompleter.future;
+      test(
+        'calls stop on the discovery and flips isDiscovering to false',
+        () async {
+          service.startDiscovery();
+          await fake.subscribedCompleter.future;
 
-        await service.stopDiscovery();
+          await service.stopDiscovery();
 
-        expect(fake.stopCalled, isTrue);
-        expect(service.isDiscovering, isFalse);
-      });
+          expect(fake.stopCalled, isTrue);
+          expect(service.isDiscovering, isFalse);
+        },
+      );
 
       test('emits an empty snapshot after stopping', () async {
         final stream = service.startDiscovery();
@@ -379,8 +392,7 @@ void main() {
     });
 
     group('dispose', () {
-      test('stops active discovery and closes the stream controller',
-          () async {
+      test('stops active discovery and closes the stream controller', () async {
         final stream = service.startDiscovery();
         final sub = stream.listen((_) {});
         await fake.subscribedCompleter.future;
@@ -409,7 +421,7 @@ BonsoirDiscoveryServiceResolvedEvent _resolved(
   return BonsoirDiscoveryServiceResolvedEvent(
     service: BonsoirService.ignoreNorms(
       name: name,
-      type: '_opencode._tcp',
+      type: '_http._tcp',
       host: host,
       port: port,
       attributes: attributes,
@@ -429,6 +441,7 @@ class _FakeDiscovery extends Fake implements BonsoirDiscovery {
   _FakeDiscovery() {
     _events = StreamController<BonsoirDiscoveryEvent>.broadcast(
       onListen: () {
+        callOrder.add('listen');
         if (!subscribedCompleter.isCompleted) {
           subscribedCompleter.complete();
         }
@@ -445,6 +458,7 @@ class _FakeDiscovery extends Fake implements BonsoirDiscovery {
   bool initializeCalled = false;
   bool startCalled = false;
   bool stopCalled = false;
+  bool exposeEventStream = true;
 
   Object? throwOnInitialize;
   Object? throwOnStart;
@@ -479,7 +493,8 @@ class _FakeDiscovery extends Fake implements BonsoirDiscovery {
   }
 
   @override
-  Stream<BonsoirDiscoveryEvent>? get eventStream => _events.stream;
+  Stream<BonsoirDiscoveryEvent>? get eventStream =>
+      exposeEventStream ? _events.stream : null;
 
   void emit(BonsoirDiscoveryEvent event) => _events.add(event);
 

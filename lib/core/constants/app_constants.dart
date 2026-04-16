@@ -2,7 +2,7 @@ class AppConstants {
   AppConstants._();
 
   static const String appName = 'OpenCode Remote';
-  static const String mdnsServiceType = '_opencode._tcp';
+  static const String mdnsServiceType = '_http._tcp';
   static const Duration healthPollingInterval = Duration(seconds: 30);
   static const int maxReconnectAttempts = 5;
 
