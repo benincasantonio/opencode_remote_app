@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs local network access to discover OpenCode servers on your network.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_opencode._tcp</string>
+	</array>
 </dict>
 </plist>
