@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/constants/app_sizing.dart';
 import 'app_button_variant.dart';
 
 class AppButton extends StatelessWidget {
@@ -57,7 +57,9 @@ class AppButton extends StatelessWidget {
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primaryGreen,
             foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.primaryGreen.withValues(alpha: 0.5),
+            disabledBackgroundColor: AppColors.primaryGreen.withValues(
+              alpha: 0.5,
+            ),
             disabledForegroundColor: Colors.white.withValues(alpha: .7),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizing.radiusSmall),

@@ -1,9 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 
-class Logger {
-  Logger._();
-
+abstract final class Logger {
   static const _levelDebug = 500;
   static const _levelInfo = 800;
   static const _levelWarning = 900;

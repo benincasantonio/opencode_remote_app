@@ -71,17 +71,17 @@ class MdnsService {
 
     try {
       await discovery.initialize();
-    } catch (error, stackTrace) {
+    } catch (err, st) {
       Logger.error(
         'mDNS discovery failed to start',
-        error: error,
-        stackTrace: stackTrace,
+        error: err,
+        stackTrace: st,
       );
       _isDiscovering = false;
       _discovery = null;
       _controller.addError(
-        NetworkException('mDNS discovery failed to start: $error', stackTrace),
-        stackTrace,
+        NetworkException('mDNS discovery failed to start: $err', st),
+        st,
       );
       return;
     }
@@ -114,20 +114,21 @@ class MdnsService {
 
     try {
       await discovery.start();
-    } catch (error, stackTrace) {
+    } catch (err, st) {
       Logger.error(
         'mDNS discovery failed to start',
-        error: error,
-        stackTrace: stackTrace,
+        error: err,
+        stackTrace: st,
       );
       _isDiscovering = false;
       await _subscription?.cancel();
       _subscription = null;
       _discovery = null;
       _controller.addError(
-        NetworkException('mDNS discovery failed to start: $error', stackTrace),
-        stackTrace,
+        NetworkException('mDNS discovery failed to start: $err', st),
+        st,
       );
+      return;
     }
   }
 
@@ -163,11 +164,11 @@ class MdnsService {
     }
     try {
       resolver.resolveService(service);
-    } catch (error, stackTrace) {
+    } catch (err, st) {
       Logger.warning(
         'mDNS resolveService failed',
-        error: error,
-        stackTrace: stackTrace,
+        error: err,
+        stackTrace: st,
         context: {'name': service.name},
       );
     }
@@ -234,11 +235,11 @@ class MdnsService {
     if (discovery != null) {
       try {
         await discovery.stop();
-      } catch (error, stackTrace) {
+      } catch (err, st) {
         Logger.warning(
           'mDNS discovery stop failed',
-          error: error,
-          stackTrace: stackTrace,
+          error: err,
+          stackTrace: st,
         );
       }
     }

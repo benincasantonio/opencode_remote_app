@@ -1,6 +1,4 @@
-class AppConstants {
-  AppConstants._();
-
+abstract final class AppConstants {
   static const String appName = 'OpenCode Remote';
   static const String mdnsServiceType = '_http._tcp';
   static const Duration healthPollingInterval = Duration(seconds: 30);

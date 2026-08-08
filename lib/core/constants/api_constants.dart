@@ -1,6 +1,4 @@
-class ApiConstants {
-  ApiConstants._();
-
+abstract final class ApiConstants {
   static const String defaultHost = '127.0.0.1';
   static const int defaultPort = 4096;
 

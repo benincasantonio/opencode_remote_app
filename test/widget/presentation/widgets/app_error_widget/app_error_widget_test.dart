@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/core/theme/app_colors.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_button/app_button.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_error_widget/app_error_widget.dart';
@@ -10,6 +10,9 @@ void main() {
     testWidgets('renders error icon in full mode', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(message: 'Error occurred', onRetry: () {}),
           ),
@@ -27,6 +30,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(message: testMessage, onRetry: () {}),
           ),
@@ -39,6 +45,9 @@ void main() {
     testWidgets('compact mode renders row layout', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(
               message: 'Error',
@@ -58,6 +67,9 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: AppErrorWidget(message: 'Error')),
         ),
       );
@@ -70,6 +82,9 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: AppErrorWidget(message: 'Error', compact: true),
             ),

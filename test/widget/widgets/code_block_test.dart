@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_copy_button.dart';
@@ -11,6 +12,9 @@ void main() {
       const testCode = 'hello';
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlock(code: testCode)),
         ),
       );
@@ -21,6 +25,9 @@ void main() {
     testWidgets('copy button present', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlock(code: 'test')),
         ),
       );
@@ -32,6 +39,9 @@ void main() {
     testWidgets('copy button is clickable', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlock(code: 'test')),
         ),
       );
@@ -47,6 +57,9 @@ void main() {
     testWidgets('line numbers toggle', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlock(code: 'test', showLineNumbers: false)),
         ),
       );
@@ -64,6 +77,9 @@ void main() {
       const maxHeight = 100.0;
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: CodeBlock(code: 'test', maxHeight: maxHeight),
           ),
@@ -88,6 +104,9 @@ void main() {
           'very_long_line_that_should_scroll_horizontally_without_wrapping_to_the_next_line_very_long_line';
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlock(code: longCode)),
         ),
       );
@@ -123,6 +142,9 @@ line 10
       ''';
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlock(code: multiLineCode, maxHeight: 100)),
         ),
       );
@@ -146,6 +168,9 @@ line 10
     testWidgets('renders SyntaxView', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: CodeBlockContent(
               code: 'test',
@@ -163,6 +188,9 @@ line 10
       const maxHeight = 100.0;
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: CodeBlockContent(
               code: 'test',
@@ -188,6 +216,9 @@ line 10
     testWidgets('horizontal scrolling present', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: CodeBlockContent(
               code: 'test',
@@ -216,6 +247,9 @@ line 10
     testWidgets('renders copy icon', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlockCopyButton(code: 'test')),
         ),
       );
@@ -226,6 +260,9 @@ line 10
     testWidgets('copy button is clickable', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(body: CodeBlockCopyButton(code: 'test')),
         ),
       );

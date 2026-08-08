@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
-import 'package:opencode_remote_app/presentation/widgets/markdown_renderer/markdown_code_builder.dart';
+import '../../../core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import 'markdown_code_builder.dart';
 
 class MarkdownRenderer extends StatelessWidget {
   const MarkdownRenderer({super.key, required this.data});

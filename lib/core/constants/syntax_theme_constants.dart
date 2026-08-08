@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
+import '../theme/app_colors.dart';
 
-class SyntaxThemeConstants {
-  SyntaxThemeConstants._();
-
+abstract final class SyntaxThemeConstants {
   static SyntaxTheme terminalSyntaxTheme() {
     return SyntaxTheme.vscodeDark().copyWith(
       backgroundColor: AppColors.surfaceVariant,

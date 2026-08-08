@@ -3,9 +3,7 @@ import '../constants/app_sizing.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
-class AppTheme {
-  AppTheme._();
-
+abstract final class AppTheme {
   static ThemeData dark() {
     final colorScheme = ColorScheme.dark(
       surface: AppColors.darkBackground,

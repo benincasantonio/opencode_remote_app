@@ -9,9 +9,7 @@ import 'app_exception.dart';
 /// Converts low-level exceptions (DioException, platform storage errors, etc.)
 /// into the app's sealed [AppException] hierarchy for consistent handling
 /// across repositories and UI layers.
-class ErrorHandler {
-  ErrorHandler._();
-
+abstract final class ErrorHandler {
   /// Maps [DioException] variants to the appropriate [AppException] subclass.
   ///
   /// Handles all [DioExceptionType] values:
@@ -50,7 +48,7 @@ class ErrorHandler {
 
       case DioExceptionType.connectionError:
         return NetworkException(
-          'Connection failed: ${error.message ?? "Unknown connection error"}',
+          'Connection failed: ${error.message ?? 'Unknown connection error'}',
           stackTrace,
         );
 

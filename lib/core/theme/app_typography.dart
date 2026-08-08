@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-class AppTypography {
-  AppTypography._();
-
+abstract final class AppTypography {
   static const String _fontFamily = 'JetBrains Mono';
 
   static final TextStyle headlineLarge = TextStyle(

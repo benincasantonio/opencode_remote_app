@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_content.dart';
-import 'package:opencode_remote_app/presentation/widgets/code_block/code_block_copy_button.dart';
+import '../../../core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import 'code_block_content.dart';
+import 'code_block_copy_button.dart';
 
 class CodeBlock extends StatelessWidget {
   final String code;
@@ -21,7 +21,7 @@ class CodeBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
         border: Border.all(color: AppColors.border),

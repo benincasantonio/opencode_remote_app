@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
 import 'package:opencode_remote_app/presentation/widgets/terminal_text/terminal_text.dart';
 
 void main() {

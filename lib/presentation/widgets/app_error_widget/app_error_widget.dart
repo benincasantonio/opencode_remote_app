@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/presentation/widgets/app_error_widget/app_error_compact_mode.dart';
-import 'package:opencode_remote_app/presentation/widgets/app_error_widget/app_error_full_mode.dart';
+import 'app_error_compact_mode.dart';
+import 'app_error_full_mode.dart';
 
 class AppErrorWidget extends StatelessWidget {
   const AppErrorWidget({
