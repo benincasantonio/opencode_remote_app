@@ -33,8 +33,12 @@ migrate_working_dir/
 /build/
 /coverage/
 
-# Generated files
+# Generated files (never committed; regenerate via `make generate`)
 *.g.dart
+**/*.freezed.dart
+widgetbook/lib/**/*.g.dart
+lib/l10n/app_localizations*.dart
+lib/generated/
 
 # Symbolication related
 app.*.symbols

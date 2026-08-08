@@ -7,21 +7,18 @@ part 'part.g.dart';
 
 @freezed
 sealed class PartTime with _$PartTime {
-  const factory PartTime({
-    required int start,
-    int? end,
-  }) = _PartTime;
+  const factory PartTime({required int start, int? end}) = _PartTime;
 
-  factory PartTime.fromJson(Map<String, dynamic> json) => _$PartTimeFromJson(json);
+  factory PartTime.fromJson(Map<String, dynamic> json) =>
+      _$PartTimeFromJson(json);
 }
 
 @freezed
 sealed class ToolTimeStart with _$ToolTimeStart {
-  const factory ToolTimeStart({
-    required int start,
-  }) = _ToolTimeStart;
+  const factory ToolTimeStart({required int start}) = _ToolTimeStart;
 
-  factory ToolTimeStart.fromJson(Map<String, dynamic> json) => _$ToolTimeStartFromJson(json);
+  factory ToolTimeStart.fromJson(Map<String, dynamic> json) =>
+      _$ToolTimeStartFromJson(json);
 }
 
 @freezed
@@ -32,7 +29,8 @@ sealed class ToolTimeFull with _$ToolTimeFull {
     int? compacted,
   }) = _ToolTimeFull;
 
-  factory ToolTimeFull.fromJson(Map<String, dynamic> json) => _$ToolTimeFullFromJson(json);
+  factory ToolTimeFull.fromJson(Map<String, dynamic> json) =>
+      _$ToolTimeFullFromJson(json);
 }
 
 @Freezed(unionKey: 'status')
@@ -64,7 +62,8 @@ sealed class ToolState with _$ToolState {
     required ToolTimeFull time,
   }) = ToolStateError;
 
-  factory ToolState.fromJson(Map<String, dynamic> json) => _$ToolStateFromJson(json);
+  factory ToolState.fromJson(Map<String, dynamic> json) =>
+      _$ToolStateFromJson(json);
 }
 
 @Freezed(unionKey: 'type', fallbackUnion: 'other')
@@ -125,5 +124,6 @@ sealed class MessagePart with _$MessagePart {
     required String type,
   }) = OtherPart;
 
-  factory MessagePart.fromJson(Map<String, dynamic> json) => _$MessagePartFromJson(json);
+  factory MessagePart.fromJson(Map<String, dynamic> json) =>
+      _$MessagePartFromJson(json);
 }

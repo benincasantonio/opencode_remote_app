@@ -9,9 +9,9 @@ import 'fixtures.dart';
 void main() {
   group('Session', () {
     test('parses the session list fixture', () {
-      final sessions = loadFixtureList('session_list')
-          .map((json) => Session.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final sessions = loadFixtureList(
+        'session_list',
+      ).map((json) => Session.fromJson(json as Map<String, dynamic>)).toList();
 
       expect(sessions, isNotEmpty);
       final session = sessions.first;
@@ -36,11 +36,13 @@ void main() {
     });
 
     test('parses parentID and permission when present', () {
-      final sessions = loadFixtureList('session_list')
-          .map((json) => Session.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final sessions = loadFixtureList(
+        'session_list',
+      ).map((json) => Session.fromJson(json as Map<String, dynamic>)).toList();
 
-      final session = sessions.firstWhere((session) => session.parentID != null);
+      final session = sessions.firstWhere(
+        (session) => session.parentID != null,
+      );
       expect(session.parentID, 'ses_23ede5db1ffedcwtYD48GytLNJ');
       expect(session.permission, isNotEmpty);
     });
@@ -65,11 +67,17 @@ void main() {
 
   group('SessionStatus', () {
     test('parses idle', () {
-      expect(SessionStatus.fromJson({'type': 'idle'}), const SessionStatus.idle());
+      expect(
+        SessionStatus.fromJson({'type': 'idle'}),
+        const SessionStatus.idle(),
+      );
     });
 
     test('parses busy', () {
-      expect(SessionStatus.fromJson({'type': 'busy'}), const SessionStatus.busy());
+      expect(
+        SessionStatus.fromJson({'type': 'busy'}),
+        const SessionStatus.busy(),
+      );
     });
 
     test('parses retry with action', () {
@@ -114,7 +122,13 @@ void main() {
         'attempt': 2,
         'message': 'model error',
         'next': 3000,
-        'action': {'reason': 'provider', 'provider': 'anthropic', 'title': 't', 'message': 'm', 'label': 'l'},
+        'action': {
+          'reason': 'provider',
+          'provider': 'anthropic',
+          'title': 't',
+          'message': 'm',
+          'label': 'l',
+        },
       });
       final roundTrip = SessionStatus.fromJson(
         jsonDecode(jsonEncode(status.toJson())) as Map<String, dynamic>,
@@ -134,9 +148,14 @@ void main() {
     test('serializes to the POST body shape', () {
       final input = CreateSessionInput(
         title: 'My session',
-        model: const SessionModel(id: 'gpt-5.4', providerID: 'github-copilot', variant: 'xhigh'),
+        model: const SessionModel(
+          id: 'gpt-5.4',
+          providerID: 'github-copilot',
+          variant: 'xhigh',
+        ),
       );
-      final json = jsonDecode(jsonEncode(input.toJson())) as Map<String, dynamic>;
+      final json =
+          jsonDecode(jsonEncode(input.toJson())) as Map<String, dynamic>;
       expect(json['title'], 'My session');
       final model = json['model'] as Map<String, dynamic>;
       expect(model['id'], 'gpt-5.4');

@@ -27,7 +27,8 @@ sealed class Session with _$Session {
     required SessionTime time,
   }) = _Session;
 
-  factory Session.fromJson(Map<String, dynamic> json) => _$SessionFromJson(json);
+  factory Session.fromJson(Map<String, dynamic> json) =>
+      _$SessionFromJson(json);
 }
 
 @freezed
@@ -39,17 +40,17 @@ sealed class SessionTime with _$SessionTime {
     int? archived,
   }) = _SessionTime;
 
-  factory SessionTime.fromJson(Map<String, dynamic> json) => _$SessionTimeFromJson(json);
+  factory SessionTime.fromJson(Map<String, dynamic> json) =>
+      _$SessionTimeFromJson(json);
 }
 
 @freezed
 sealed class CacheTokens with _$CacheTokens {
-  const factory CacheTokens({
-    required double read,
-    required double write,
-  }) = _CacheTokens;
+  const factory CacheTokens({required double read, required double write}) =
+      _CacheTokens;
 
-  factory CacheTokens.fromJson(Map<String, dynamic> json) => _$CacheTokensFromJson(json);
+  factory CacheTokens.fromJson(Map<String, dynamic> json) =>
+      _$CacheTokensFromJson(json);
 }
 
 @freezed
@@ -74,16 +75,16 @@ sealed class SessionSummary with _$SessionSummary {
     List<dynamic>? diffs,
   }) = _SessionSummary;
 
-  factory SessionSummary.fromJson(Map<String, dynamic> json) => _$SessionSummaryFromJson(json);
+  factory SessionSummary.fromJson(Map<String, dynamic> json) =>
+      _$SessionSummaryFromJson(json);
 }
 
 @freezed
 sealed class SessionShare with _$SessionShare {
-  const factory SessionShare({
-    required String url,
-  }) = _SessionShare;
+  const factory SessionShare({required String url}) = _SessionShare;
 
-  factory SessionShare.fromJson(Map<String, dynamic> json) => _$SessionShareFromJson(json);
+  factory SessionShare.fromJson(Map<String, dynamic> json) =>
+      _$SessionShareFromJson(json);
 }
 
 @freezed
@@ -95,7 +96,8 @@ sealed class SessionRevert with _$SessionRevert {
     String? diff,
   }) = _SessionRevert;
 
-  factory SessionRevert.fromJson(Map<String, dynamic> json) => _$SessionRevertFromJson(json);
+  factory SessionRevert.fromJson(Map<String, dynamic> json) =>
+      _$SessionRevertFromJson(json);
 }
 
 @freezed
@@ -106,7 +108,8 @@ sealed class SessionModel with _$SessionModel {
     String? variant,
   }) = _SessionModel;
 
-  factory SessionModel.fromJson(Map<String, dynamic> json) => _$SessionModelFromJson(json);
+  factory SessionModel.fromJson(Map<String, dynamic> json) =>
+      _$SessionModelFromJson(json);
 }
 
 @freezed
@@ -117,7 +120,8 @@ sealed class ModelRef with _$ModelRef {
     String? variant,
   }) = _ModelRef;
 
-  factory ModelRef.fromJson(Map<String, dynamic> json) => _$ModelRefFromJson(json);
+  factory ModelRef.fromJson(Map<String, dynamic> json) =>
+      _$ModelRefFromJson(json);
 }
 
 @freezed
@@ -131,7 +135,8 @@ sealed class RetryAction with _$RetryAction {
     String? link,
   }) = _RetryAction;
 
-  factory RetryAction.fromJson(Map<String, dynamic> json) => _$RetryActionFromJson(json);
+  factory RetryAction.fromJson(Map<String, dynamic> json) =>
+      _$RetryActionFromJson(json);
 }
 
 @Freezed(unionKey: 'type')
