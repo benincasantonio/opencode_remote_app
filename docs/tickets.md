@@ -143,55 +143,31 @@ Acceptance: Service tests pass with key behaviors covered.
 
 ## Phase 4 - Data Models
 
-### P4-01 Create ServerHealth model
-Goal: Represent server health responses.
-Details: Create lib/data/models/server_health.dart as a Freezed class with fields healthy and version. Add fromJson and toJson.
-Acceptance: ServerHealth parses the /global/health response.
+> **Ticket consolidation (Aug 2026):** The previous P4-01..P4-10 were merged into 4 tickets to cut review cycles, with unit tests folded into each ticket per the testing policy above. Field shapes below were validated against the current OpenCode server source (`anomalyco/opencode`, `dev` branch). Key API drift captured: `Session` uses nested `time.{created,updated}` (no top-level createdAt), `SessionStatus` has no `error` variant (it is `retry`), `Part` is a 12-type union (no separate toolUse/toolResult/thinking), `FileNode` is a flat list without children, events use `{id, type, properties}` envelopes, and `/api/agent` is the new agent surface.
 
-### P4-02 Create Session models
-Goal: Represent sessions and session status.
-Details: Create lib/data/models/session.dart. Define Session with id, title, createdAt, updatedAt, parentID, share. Define SessionStatus as a Freezed union with idle, busy, error variants. Add fromJson and toJson.
-Acceptance: Session and SessionStatus parse API responses from /session and /session/status.
+### P4-01 Create chat data models (Session, Message, Part)
+Goal: Represent sessions, messages, and parts from the current chat API.
+Details: Create lib/data/models/session.dart as a Freezed class with id, slug, projectID, workspaceID (optional), directory, path (optional), parentID (optional), summary (optional), cost (optional), tokens (optional: input, output, reasoning, cache.read, cache.write), share (optional: url), title, agent (optional), model (optional: id, providerID, variant), version, metadata (optional), permission (optional), revert (optional: messageID, partID, snapshot, diff), time (created, updated, compacting, archived). Note the nested time object; there is no top-level createdAt/updatedAt. Define SessionStatus as a Freezed union with idle, busy, and retry (attempt, message, action, next) variants — there is no error variant. Add CreateSessionInput (parentID, title, agent, model, metadata, permission) for POST /session. Create lib/data/models/message.dart. Define Message as a Freezed union discriminated by role: UserMessage (id, sessionID, time.created, agent, model {providerID, modelID, variant}, format, summary, system, tools) and AssistantMessage (id, sessionID, time {created, completed}, parentID, modelID, providerID, mode, agent, path {cwd, root}, cost, tokens, error, finish). Define MessagePart as a Freezed union discriminated by type with 12 variants: text, reasoning, tool (with state union pending/running/completed/error), step-start, step-finish, file, snapshot, patch, agent, retry, compaction, subtask. Define MessageWithParts wrapper with info and parts. Use branded MessageID (msg_ prefix) and PartID (prt_ prefix). Add fromJson and toJson. Capture real JSON fixtures from a live `opencode serve` instance (sessions, status map, messages) to use as test fixtures for this and all later Phase 4 tickets.
+Acceptance: Models parse real /session, /session/status, and /session/:id/message responses. Union discrimination works for role, part type, and tool state. JSON keys match the server exactly. Analyzer passes.
+Testing: Unit tests per model covering fromJson/toJson round-trips, union discrimination, absent optional fields, and base64-encoded fields.
 
-### P4-03 Create Message and Part models
-Goal: Represent messages and parts in sessions.
-Details: Create lib/data/models/message.dart. Define Message with id, role, sessionID, createdAt, error, metadata. Define Part union with text, toolUse, toolResult, thinking. Define MessageWithParts wrapper with info and parts. Add fromJson and toJson.
-Acceptance: MessageWithParts parses /session/:id/message responses correctly.
+### P4-02 Create config, provider, and agent models
+Goal: Represent server config, providers/models, and agents.
+Details: Create lib/data/models/config.dart. Define AppConfig as a subset of the server ConfigV1.Info schema that the app reads (model, small_model, default_agent, server, share, disabled_providers, enabled_providers, experimental) and tolerate unknown fields. Create lib/data/models/provider.dart. Define ProviderListResult (all, default map of providerID to modelID, connected) for GET /provider. Define ProviderInfo (id, name, source, env, key, options, models) with ProviderModel nested under models (id, providerID, api {id, url, npm}, name, family, capabilities, cost, limit, status, options, headers, release_date, variants). Define ConfigProvidersResult (providers, default) for GET /config/providers. Create lib/data/models/agent.dart. Define AgentInfo with id, model (optional), request {headers, body}, system (optional), description (optional), mode (subagent|primary|all), hidden, color (optional), steps (optional), permissions. Note there is no name field on agents; the agent id is the display key. Add fromJson and toJson.
+Acceptance: Models parse /provider, /config, /config/providers, and /api/agent responses. Unknown/extra config fields do not break parsing. Analyzer passes.
+Testing: Unit tests with captured fixtures covering fromJson round-trips, unknown-field tolerance, and provider model list parsing.
 
-### P4-04 Create Project model
-Goal: Represent the current project.
-Details: Create lib/data/models/project.dart. Define Project with id, name, path. Add fromJson and toJson.
-Acceptance: Project parses /project/current response.
+### P4-03 Create file and search models
+Goal: Represent file listing, file content, and search results.
+Details: Create lib/data/models/file_node.dart. Define FileNode with name, path, absolute, type (file|directory), ignored. The /file endpoint returns a flat list — there are no children; the file tree is built client-side by the FileTreeWidget ticket. Define FileContent with type (text|binary), content, diff (optional), patch (optional: oldFileName, newFileName, oldHeader, newHeader, hunks, index), encoding (optional, base64), mimeType (optional). Create lib/data/models/search.dart (new coverage). Define FindMatch for GET /find (path.text, lines.text, line_number, absolute_offset, submatches [{match.text, start, end}]). Define FileStatus for GET /file/status (path, added, removed, status added|deleted|modified). Note GET /find/file returns a plain list of path strings, not objects. Add fromJson and toJson.
+Acceptance: Models parse /file, /file/content, /find, /find/file, and /file/status responses. Binary content with base64 encoding parses correctly. Analyzer passes.
+Testing: Unit tests per model with fixtures covering content types, base64 encoding, and empty search results.
 
-### P4-05 Create Config and Provider models
-Goal: Represent server config and provider list.
-Details: Create lib/data/models/config.dart. Define AppConfig, ProviderInfo, ProviderModel with fields matching /config and /provider responses. Add fromJson and toJson.
-Acceptance: Config models parse /config and /provider responses.
-
-### P4-06 Create FileNode and FileContent models
-Goal: Represent file tree nodes and file content.
-Details: Create lib/data/models/file_node.dart. Define FileNode with name, path, type, and optional children. Define FileContent with content and type. Add fromJson and toJson.
-Acceptance: File models parse /file and /file/content responses.
-
-### P4-07 Create Agent model
-Goal: Represent OpenCode agents.
-Details: Create lib/data/models/agent.dart. Define Agent with id, name, description, mode. Add fromJson and toJson.
-Acceptance: Agent parses /agent responses.
-
-### P4-08 Create ServerEvent model
-Goal: Represent SSE events.
-Details: Create lib/data/models/server_event.dart as a Freezed union. Add variants for sessionUpdated, sessionStatusChanged, messageUpdated, partUpdated, serverConnected, and unknown. Implement factory fromSseData to map event type and data.
-Acceptance: ServerEvent can parse SSE payloads into typed events.
-
-### P4-09 Create NotificationToken model
-Goal: Represent device notification registration.
-Details: Create lib/data/models/notification_token.dart with fields token, label, registeredAt. Add fromJson and toJson.
-Acceptance: NotificationToken matches Rust notifier register API payload.
-
-### P4-10 Unit tests for models
-Goal: Validate Freezed DTO serialization early.
-Details: Add unit tests for core models (ServerHealth, Session/SessionStatus, Message/Part, Project, Config/Provider, FileNode/FileContent, Agent, ServerEvent, NotificationToken). Focus on fromJson/toJson and union parsing.
-Acceptance: Model tests pass and cover serialization edge cases.
+### P4-04 Create server models and SSE events
+Goal: Represent health, project, SSE events, and notification registration.
+Details: Create lib/data/models/server_health.dart. Define ServerHealth with healthy and version for GET /global/health. Create lib/data/models/project.dart. Define Project with id, worktree, vcs (optional), name (optional), icon (optional), commands (optional), time (created, updated, initialized), sandboxes for GET /project/current. Note the field is worktree, not path. Create lib/data/models/server_event.dart as a Freezed union. The SSE envelope is {directory, project, workspace, payload} where payload is {id, type, properties}. Add typed variants for session.created/updated/deleted, message.updated/removed, message.part.updated/removed, message.part.delta, session.status, session.idle, session.diff, session.error, project.updated, server.connected, global.disposed, and sync, plus an unknown fallback variant for forward compatibility. Reuse the Phase 4-01 models inside event properties. Implement factory fromSseData to map the type field to the matching variant. Create lib/data/models/notification_token.dart with fields token, label, registeredAt for the Rust notifier register API (contract unchanged). Add fromJson and toJson.
+Acceptance: ServerEvent parses /global/event SSE payloads into typed events. Unknown event types fall back to the unknown variant without crashing. Analyzer passes.
+Testing: Unit tests with captured SSE fixtures and an unknown-type fallback test.
 
 ## Phase 5 - Data Sources
 
