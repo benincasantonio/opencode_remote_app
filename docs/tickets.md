@@ -2,531 +2,154 @@
 
 This document lists all implementation tickets with detailed descriptions and acceptance criteria.
 
-Testing policy: Unit and integration tests are important from the beginning and should be added alongside each feature. Phase 15 focuses on coverage audits and hardening, not first-time test creation.
-
-## Phase 1 - Project Bootstrap
-
-### P1-01 Update pubspec dependencies
-Goal: Add all required packages for the app.
-Details: Add runtime deps (flutter_riverpod, riverpod_annotation, dio, go_router, firebase_core, firebase_messaging, freezed_annotation, json_annotation, bonsoir, shared_preferences, flutter_secure_storage, flutter_markdown, flutter_syntax_view, cupertino_icons). Add dev deps (flutter_lints, build_runner, riverpod_generator, freezed, json_serializable, custom_lint, riverpod_lint). Run flutter pub get.
-Acceptance: pubspec.yaml contains all dependencies with versions from AGENTS.md. pubspec.lock updated by flutter pub get. flutter pub get completes without errors.
-
-### P1-02 Scaffold folder structure
-Goal: Create the initial directory layout and keep empty dirs tracked.
-Details: Create all lib/ subdirectories for core, data, domain, presentation, and services per AGENTS.md. Add widget subfolders under presentation/widgets and screen subfolders under presentation/screens. Create test/unit, test/widget, and test/integration directories. Add a .gitkeep file to each empty directory so Git tracks the structure.
-Acceptance: Directory tree matches AGENTS.md structure. Empty directories include .gitkeep files.
-
-### P1-03 Create api_constants.dart
-Goal: Centralize API connection defaults and timeouts.
-Details: Create lib/core/constants/api_constants.dart. Define ApiConstants with default host 127.0.0.1 and port 4096. Add timeouts (connect, receive, send) and SSE reconnect delay constants. Endpoint paths will be defined in the API client datasources when implemented.
-Acceptance: ApiConstants exposes connection defaults and timeouts as static constants. File compiles with no unused imports.
-
-### P1-04 Create app_constants.dart
-Goal: Define app-wide constants.
-Details: Create lib/core/constants/app_constants.dart. Add constants for app display name, mDNS service type (_opencode._tcp), health polling interval, max reconnect attempts, and Android notification channel ID/name.
-Acceptance: AppConstants contains the required values as static constants. File compiles with no unused imports.
-
-### P1-05 Create app_colors.dart
-Goal: Create the terminal color palette.
-Details: Create lib/core/theme/app_colors.dart. Define AppColors with dark background, surface, surfaceVariant, border, primaryGreen, accentCyan, textPrimary, textSecondary, textMuted, error, warning, success, toolUse, thinking. Use hex values consistent with a dark terminal aesthetic.
-Acceptance: AppColors exposes all palette colors as static Color constants. Colors align with the terminal-style theme.
-
-### P1-06 Create app_typography.dart
-Goal: Define typography for the terminal theme.
-Details: Create lib/core/theme/app_typography.dart. Use GoogleFonts.jetBrainsMono with Fira Code fallback. Provide TextStyles: headlineLarge, headlineMedium, titleLarge, titleMedium, bodyLarge, bodyMedium, bodySmall, codeLarge, codeSmall, label. Default text color should use AppColors.textPrimary unless overridden.
-Acceptance: AppTypography provides all required TextStyles. Styles use the monospace font consistently.
-
-### P1-07 Create app_theme.dart
-Goal: Assemble ThemeData for the app.
-Details: Create lib/core/theme/app_theme.dart. Build ThemeData using Material 3 dark ColorScheme and AppColors. Configure scaffoldBackgroundColor, appBarTheme, cardTheme, inputDecorationTheme, dividerTheme, snackBarTheme, floatingActionButtonTheme. Apply AppTypography text styles globally.
-Acceptance: AppTheme.dark returns a complete ThemeData instance. Theme uses the terminal palette and typography.
-
-### P1-08 Create app_exception.dart
-Goal: Define a structured exception hierarchy.
-Details: Create lib/core/errors/app_exception.dart. Add base AppException with message and optional stackTrace. Add subclasses: NetworkException, ServerException (statusCode, responseBody), AuthException, TimeoutException, ParseException, CacheException, SseException. Override toString for readable error messages.
-Acceptance: AppException hierarchy compiles and covers all error types. ServerException captures HTTP status and response body.
-
-### P1-09 Create error_handler.dart
-Goal: Map low-level errors to AppException.
-Details: Create lib/core/errors/error_handler.dart. Implement mapDioException(DioException) -> AppException with proper mapping for timeouts, bad responses (401/403 -> AuthException), connection errors, and defaults. Add handle(error, stackTrace) that logs and returns AppException.
-Acceptance: ErrorHandler maps Dio errors consistently. All methods compile and are unit-testable.
-
-### P1-09a Unit tests for error handling
-Goal: Verify error mapping behavior early.
-Details: Create unit tests for mapDioException and handle. Cover timeouts, 401/403, connection error, and default mapping cases.
-Acceptance: Tests pass and cover expected mappings and messages.
-
-### P1-10 Create logger.dart
-Goal: Provide a simple logging utility.
-Details: Create lib/core/utils/logger.dart. Add Logger.debug/info/warning/error methods. Use dart:developer log with a timestamped tag. error() should accept optional error and stackTrace. In debug builds, also print to console for visibility.
-Acceptance: Logger methods compile and log consistently. Error logs include stackTrace when provided.
-
-### P1-11 Create extensions.dart
-Goal: Add convenience extensions for common tasks.
-Details: Create lib/core/utils/extensions.dart. StringX: truncate, capitalize, isValidUrl. DateTimeX: timeAgo, formatShort. BuildContextX: theme, textTheme, colorScheme, mediaQuery, showSnackBar helpers. AsyncValueX: helpers for common loading and error rendering patterns.
-Acceptance: Extensions compile and are usable across the app. No unused imports or analyzer warnings.
-
-## Phase 2 - UI Building Blocks
-
-### P2-01 Create TerminalText widget
-Goal: Create a monospace text building block.
-Details: Create lib/presentation/widgets/terminal_text/terminal_text.dart. Props: text, style override, color, fontSize, maxLines, overflow, selectable. Use AppTypography and AppColors by default. When selectable is true, render SelectableText.
-Acceptance: TerminalText renders with the terminal font and colors. Optional props override defaults correctly.
-
-### P2-02 Create CodeBlock widget
-Goal: Create a reusable code block widget.
-Details: Create lib/presentation/widgets/code_block/code_block.dart. Props: code, language, showLineNumbers, maxHeight. Use flutter_syntax_view for syntax highlighting with a styled container. Add a copy-to-clipboard icon button in the top-right corner. Support horizontal scrolling for long lines.
-Acceptance: CodeBlock renders code with syntax highlighting. Copy button copies full code to clipboard. Long lines scroll horizontally.
-
-### P2-03 Create LoadingIndicator widget
-Goal: Create a terminal-styled loading indicator.
-Details: Create lib/presentation/widgets/loading_indicator/loading_indicator.dart. Support small and large variants via a size enum. Use CircularProgressIndicator with AppColors.primaryGreen. Large variant optionally shows a message below the spinner.
-Acceptance: LoadingIndicator renders both size variants. Large variant shows message when provided.
-
-### P2-04 Create AppErrorWidget
-Goal: Create a reusable error display widget.
-Details: Create lib/presentation/widgets/app_error_widget/app_error_widget.dart. Props: message, onRetry, compact. Full mode: error icon, message text, retry button. Compact mode: single row with icon, message, retry icon button. Use AppButton and terminal styling.
-Acceptance: AppErrorWidget displays error text and triggers retry. Compact mode fits in tight spaces.
-
-### P2-05 Create ConnectionBadge widget
-Goal: Create a connection status badge widget.
-Details: Create lib/presentation/widgets/connection_badge/connection_badge.dart. Status enum: connected, connecting, disconnected, error. Render a colored dot + label + optional server name. Animate the dot when status is connecting.
-Acceptance: ConnectionBadge shows correct colors and labels. Connecting state animates.
-
-### P2-06 Create MarkdownRenderer widget
-Goal: Create a markdown rendering widget.
-Details: Create lib/presentation/widgets/markdown_renderer/markdown_renderer.dart. Wrap flutter_markdown with terminal typography and colors. Style links with AppColors.accentCyan. Render code blocks using the CodeBlock widget. Support selectable text.
-Acceptance: MarkdownRenderer renders text, links, and code blocks correctly. Code blocks use CodeBlock styling.
-
-### P2-07 Create TerminalAppBar widget
-Goal: Create a terminal-styled app bar.
-Details: Create lib/presentation/widgets/app_bar/app_bar.dart. Return a PreferredSizeWidget. Props: title, actions, leading, showConnectionBadge. Style with AppColors surface and a subtle bottom border. Include ConnectionBadge when enabled.
-Acceptance: TerminalAppBar renders with terminal styling. ConnectionBadge appears when enabled.
-
-### P2-08 Create AppButton widget
-Goal: Create a reusable button component.
-Details: Create lib/presentation/widgets/app_button/app_button.dart. Variants: primary, secondary, destructive, ghost. Props: label, onPressed, isLoading, icon. Show a small spinner when isLoading is true. Apply AppTypography and AppColors.
-Acceptance: AppButton renders all variants correctly. Loading state disables button and shows spinner.
-
-### P2-09 Widget tests for building blocks
-Goal: Validate core UI components early.
-Details: Add widget tests for TerminalText, ConnectionBadge, AppButton, AppErrorWidget, and LoadingIndicator with key props and interactions.
-Acceptance: Widget tests pass for all building blocks.
-
-### P2-10 Create error display system
-Goal: Show meaningful, consistent errors to users across the app.
-Details: Create lib/presentation/widgets/app_error_snackbar/app_error_snackbar.dart to render AppException messages in a terminal-styled SnackBar with icon, message, retry action, and an optional View Details expansion. Create lib/core/errors/app_exception_ext.dart to map AppException types to user-friendly copy, severity, icons, retry capability, and a details string (include stackTrace and ServerException.responseBody when available). Create lib/core/errors/error_display_service.dart to centralize SnackBar display via ScaffoldMessenger and choose ephemeral vs persistent behavior based on severity (auth/server critical -> persistent, network/timeout -> auto-dismiss). Update lib/core/errors/errors.dart barrel exports.
-Acceptance: Error snackbars render with correct icon/message; retry and details actions work; severity drives persistence; mapping covers all AppException subtypes; analyzer passes.
-Testing: Add unit tests for AppException mapping (message, severity, details). Add widget tests for AppErrorSnackBar rendering, retry action callback, and details expansion.
-
-## Phase 3 - Services Layer
-
-### P3-01 Create Dio client service
-Goal: Provide a configured Dio instance for the app.
-Details: Create lib/services/dio_client.dart. Build a DioClient that accepts baseUrl and optional credentials. Configure timeouts, JSON response type, and interceptors for logging, auth, and error mapping. Expose the Dio instance and a dispose method.
-Acceptance: DioClient creates a functional Dio instance with interceptors and configurable baseUrl.
-
-### P3-02 Create Firebase service
-Goal: Centralize Firebase and FCM behavior.
-Details: Create lib/services/firebase_service.dart. Implement initialize(), getToken(), onTokenRefresh(), onMessage(), onMessageOpenedApp(), getInitialMessage(). Guard with try and catch so app can run before Firebase is configured.
-Acceptance: FirebaseService compiles and exposes all required methods. App startup can call initialize without crashing in dev.
-
-### P3-03 Create mDNS discovery service
-Goal: Discover OpenCode servers on the local network.
-Details: Create lib/services/mdns_service.dart using bonsoir. Implement startDiscovery() returning a stream of discovered servers and stopDiscovery() to release resources. Maintain a list of currently discovered servers and emit updates on changes.
-Acceptance: MdnsService can start and stop discovery and emit discovered servers.
-
-### P3-04 Unit tests for services
-Goal: Validate service behavior early.
-Details: Add unit tests for DioClient (interceptors, baseUrl, timeouts), FirebaseService guard behavior, and MdnsService start/stop lifecycle (with mocks).
-Acceptance: Service tests pass with key behaviors covered.
-
-## Phase 4 - Data Models
-
-> **Ticket consolidation (Aug 2026):** The previous P4-01..P4-10 were merged into 4 tickets to cut review cycles, with unit tests folded into each ticket per the testing policy above. Field shapes below were validated against the current OpenCode server source (`anomalyco/opencode`, `dev` branch). Key API drift captured: `Session` uses nested `time.{created,updated}` (no top-level createdAt), `SessionStatus` has no `error` variant (it is `retry`), `Part` is a 12-type union (no separate toolUse/toolResult/thinking), `FileNode` is a flat list without children, events use `{id, type, properties}` envelopes, and `/api/agent` is the new agent surface.
-
-### P4-01 Create chat data models (Session, Message, Part)
-Goal: Represent sessions, messages, and parts from the current chat API.
-Details: Create lib/data/models/session.dart as a Freezed class with id, slug, projectID, workspaceID (optional), directory, path (optional), parentID (optional), summary (optional), cost (optional), tokens (optional: total, input, output, reasoning, cache.read, cache.write), share (optional: url), title, agent (optional), model (optional: SessionModel {id, providerID, variant} — note the session uses key `id` while user messages use `modelID`), version, metadata (optional), permission (optional), revert (optional: messageID, partID, snapshot, diff), time (created, updated, compacting, archived). Note the nested time object; there is no top-level createdAt/updatedAt. Define SessionStatus as a Freezed union with idle, busy, and retry (attempt, message, action, next) variants — there is no error variant. Add CreateSessionInput (parentID, title, agent, model, metadata, permission) for POST /session. Create lib/data/models/message.dart. Define Message as a Freezed union discriminated by role: UserMessage (id, sessionID, time.created, agent, model {providerID, modelID, variant}, format, summary, system, tools) and AssistantMessage (id, sessionID, time {created, completed}, parentID, modelID, providerID, mode, agent, path {cwd, root}, cost, tokens, error, finish). Define MessagePart as a Freezed union discriminated by type with the variants the chat UI renders: text, reasoning, tool (with state union pending/running/completed/error), step-start, step-finish, plus an `other` fallback variant (id, sessionID, messageID, type) via `@Freezed(fallbackUnion: 'other')` that absorbs all remaining server part types (file, snapshot, patch, agent, retry, compaction, subtask, and future ones) without crashing. Define MessageWithParts wrapper with info and parts. Use branded MessageID (msg_ prefix) and PartID (prt_ prefix). Add fromJson and toJson. Capture real JSON fixtures from a live `opencode serve` instance (sessions, status map, messages) to use as test fixtures for this and all later Phase 4 tickets.
-Acceptance: Models parse real /session, /session/status, and /session/:id/message responses. Union discrimination works for role, part type, and tool state. JSON keys match the server exactly. Analyzer passes.
-Testing: Unit tests per model covering fromJson/toJson round-trips, union discrimination, absent optional fields, and base64-encoded fields.
-
-### P4-02 Create config, provider, and agent models
-Goal: Represent server config, providers/models, and agents.
-Details: Create lib/data/models/config.dart. Define AppConfig as a subset of the server ConfigV1.Info schema that the app reads (model, small_model, default_agent, server, share, disabled_providers, enabled_providers, experimental) and tolerate unknown fields. Create lib/data/models/provider.dart. Define ProviderListResult (all, default map of providerID to modelID, connected) for GET /provider. Define ProviderInfo (id, name, source, env, key, options, models) with ProviderModel nested under models (id, providerID, api {id, url, npm}, name, family, capabilities, cost, limit, status, options, headers, release_date, variants). Define ConfigProvidersResult (providers, default) for GET /config/providers. Create lib/data/models/agent.dart. Define AgentInfo with id, model (optional), request {headers, body}, system (optional), description (optional), mode (subagent|primary|all), hidden, color (optional), steps (optional), permissions. Note there is no name field on agents; the agent id is the display key. Add fromJson and toJson.
-Acceptance: Models parse /provider, /config, /config/providers, and /api/agent responses. Unknown/extra config fields do not break parsing. Analyzer passes.
-Testing: Unit tests with captured fixtures covering fromJson round-trips, unknown-field tolerance, and provider model list parsing.
-
-### P4-03 Create file and search models
-Goal: Represent file listing, file content, and search results.
-Details: Create lib/data/models/file_node.dart. Define FileNode with name, path, absolute, type (file|directory), ignored. The /file endpoint returns a flat list — there are no children; the file tree is built client-side by the FileTreeWidget ticket. Define FileContent with type (text|binary), content, diff (optional), patch (optional: oldFileName, newFileName, oldHeader, newHeader, hunks, index), encoding (optional, base64), mimeType (optional). Create lib/data/models/search.dart (new coverage). Define FindMatch for GET /find (path.text, lines.text, line_number, absolute_offset, submatches [{match.text, start, end}]). Define FileStatus for GET /file/status (path, added, removed, status added|deleted|modified). Note GET /find/file returns a plain list of path strings, not objects. Add fromJson and toJson.
-Acceptance: Models parse /file, /file/content, /find, /find/file, and /file/status responses. Binary content with base64 encoding parses correctly. Analyzer passes.
-Testing: Unit tests per model with fixtures covering content types, base64 encoding, and empty search results.
-
-### P4-04 Create server models and SSE events
-Goal: Represent health, project, SSE events, and notification registration.
-Details: Create lib/data/models/server_health.dart. Define ServerHealth with healthy and version for GET /global/health. Create lib/data/models/project.dart. Define Project with id, worktree, vcs (optional), name (optional), icon (optional), commands (optional), time (created, updated, initialized), sandboxes for GET /project/current. Note the field is worktree, not path. Create lib/data/models/server_event.dart as a Freezed union. The SSE envelope is {directory, project, workspace, payload} where payload is {id, type, properties}. Add typed variants for session.created/updated/deleted, message.updated/removed, message.part.updated/removed, message.part.delta, session.status, session.idle, session.diff, session.error, project.updated, server.connected, global.disposed, and sync, plus an unknown fallback variant for forward compatibility. Reuse the Phase 4-01 models inside event properties. Implement factory fromSseData to map the type field to the matching variant. Create lib/data/models/notification_token.dart with fields token, label, registeredAt for the Rust notifier register API (contract unchanged). Add fromJson and toJson.
-Acceptance: ServerEvent parses /global/event SSE payloads into typed events. Unknown event types fall back to the unknown variant without crashing. Analyzer passes.
-Testing: Unit tests with captured SSE fixtures and an unknown-type fallback test.
-
-## Phase 5 - Data Sources
-
-### P5-01 Implement OpenCode API client
-Goal: Access OpenCode server endpoints via Dio.
-Details: Create lib/data/datasources/opencode_api.dart. Implement methods for health, sessions, messages, files, config, providers, agents, auth, and project endpoints. Each method calls Dio and maps the response to Freezed models.
-Acceptance: OpencodeApi covers all endpoints used by the app and returns typed models.
-
-### P5-02 Implement SSE client
-Goal: Stream server events in real time.
-Details: Create lib/data/datasources/sse_client.dart. Open a Dio streaming request to /event, parse SSE lines, map to ServerEvent, and emit a Stream. Implement reconnect with delay after disconnection.
-Acceptance: SSE client emits ServerEvent objects and reconnects on failures.
-
-### P5-03 Implement local storage layer
-Goal: Provide persisted server configs and secure credential storage.
-Details: Create lib/data/datasources/local_storage.dart. Use shared_preferences for saved servers and lightweight flags. Use flutter_secure_storage for credentials. Provide CRUD methods for server configs and credential storage.
-Acceptance: LocalStorage supports save, read, and delete for saved servers and credentials.
-
-## Phase 6 - Repositories
-
-### P6-01 Implement ServerRepository
-Goal: Manage connection and server discovery.
-Details: Create lib/data/repositories/server_repository.dart. Integrate OpencodeApi, LocalStorage, and MdnsService. Implement connect, disconnect, health check, saved server list, delete server, and discovery stream.
-Acceptance: ServerRepository can connect, persist servers, and expose discovery and health info.
-
-### P6-02 Implement SessionRepository
-Goal: Manage session operations.
-Details: Create lib/data/repositories/session_repository.dart. Implement list, get, create, delete, fork, share, abort, and status methods.
-Acceptance: SessionRepository returns sessions and session status from network calls.
-
-### P6-03 Implement MessageRepository
-Goal: Manage message operations.
-Details: Create lib/data/repositories/message_repository.dart. Implement list messages, get message, send prompt sync, and send prompt async.
-Acceptance: MessageRepository returns messages per session and sends prompts.
-
-### P6-04 Implement FileRepository
-Goal: Access file endpoints.
-Details: Create lib/data/repositories/file_repository.dart. Implement list directory, read file, search text, and find files. No caching required.
-Acceptance: FileRepository provides access to file browsing features.
-
-### P6-05 Implement ConfigRepository
-Goal: Access config, providers, and agents.
-Details: Create lib/data/repositories/config_repository.dart. Implement getConfig, listProviders, listAgents, and setAuth.
-Acceptance: ConfigRepository returns typed config and provider data.
-
-### P6-06 Implement NotificationRepository
-Goal: Register devices with the Rust notifier.
-Details: Create lib/data/repositories/notification_repository.dart. Implement registerDevice, unregisterDevice, and health check using a Dio client pointed at the Rust notifier base URL.
-Acceptance: NotificationRepository can register and unregister device tokens.
-
-## Phase 7 - Riverpod Providers
-
-### P7-01 Connection providers
-Goal: Provide connection state and core clients.
-Details: Create lib/domain/providers/connection_providers.dart. Provide LocalStorage, DioClient, current server config, and a connection state notifier with connect and disconnect methods.
-Acceptance: Providers expose connection state and current server info.
-
-### P7-02 Server providers
-Goal: Expose server data and discovery streams.
-Details: Create lib/domain/providers/server_providers.dart. Provide ServerRepository, serverHealthProvider with polling, savedServersProvider, and mdnsDiscoveryProvider.
-Acceptance: Server providers supply health and discovery data to the UI.
-
-### P7-03 Session providers
-Goal: Expose session data to UI.
-Details: Create lib/domain/providers/session_providers.dart. Provide SessionRepository, sessionsListProvider, sessionDetailProvider family, and sessionStatusesProvider.
-Acceptance: Providers return AsyncValue for session data.
-
-### P7-04 Message providers
-Goal: Expose messages to the chat UI.
-Details: Create lib/domain/providers/message_providers.dart. Provide MessageRepository, messagesProvider family, and a sendMessage provider method that invalidates messages on success.
-Acceptance: Messages update when a new prompt is sent.
-
-### P7-05 File providers
-Goal: Expose file browsing data.
-Details: Create lib/domain/providers/file_providers.dart. Provide FileRepository, directoryListingProvider, fileContentProvider, and fileSearchProvider families.
-Acceptance: Providers return file data for the browser screens.
-
-### P7-06 Config providers
-Goal: Expose config and provider lists.
-Details: Create lib/domain/providers/config_providers.dart. Provide ConfigRepository, appConfigProvider, providersListProvider, and agentsListProvider.
-Acceptance: Providers return config and provider data to the UI.
-
-### P7-07 Event providers
-Goal: Expose SSE events to the app.
-Details: Create lib/domain/providers/event_providers.dart. Provide SseClient, eventStreamProvider, and an event handler that invalidates relevant providers on events.
-Acceptance: Event providers trigger data refresh on SSE updates.
-
-### P7-08 Notification providers
-Goal: Manage FCM token registration via providers.
-Details: Create lib/domain/providers/notification_providers.dart. Provide FirebaseService, fcmTokenProvider, NotificationRepository, and notificationRegistrationProvider that registers tokens.
-Acceptance: Tokens register automatically and update on refresh.
-
-### P7-09 Run build_runner for providers
-Goal: Generate Riverpod and model code.
-Details: Run dart run build_runner build --delete-conflicting-outputs. Resolve any generator errors or missing imports.
-Acceptance: All generated files are present and analyzer passes.
-
-## Phase 8 - Routing and App Shell
-
-### P8-01 Configure GoRouter
-Goal: Define all routes and redirects.
-Details: Create lib/presentation/router/app_router.dart. Add routes for splash, connect, home, sessions, chat/:id, files, file content, and settings. Add redirect logic based on connection state and support deep links for notifications.
-Acceptance: Routing works for all screens and redirects appropriately.
-
-### P8-02 Create app.dart
-Goal: Wire up MaterialApp.router.
-Details: Create lib/app.dart with MaterialApp.router, AppTheme.dark, and routerConfig from app_router.dart. Wrap in error boundary if needed.
-Acceptance: App renders with the correct theme and router.
-
-### P8-03 Update main.dart
-Goal: Initialize core services and launch the app.
-Details: Ensure WidgetsFlutterBinding is initialized, start FirebaseService, and run App within ProviderScope with overrides.
-Acceptance: App starts without the default counter UI and initializes services.
-
-## Phase 9 - Connect and Home Screens
-
-### P9-01 Create SplashScreen
-Goal: Provide a startup experience and auto-connect logic.
-Details: Create lib/presentation/screens/splash/splash_screen.dart. Show logo and LoadingIndicator. Check for saved server and attempt auto-connect, then route to home or connect.
-Acceptance: SplashScreen routes correctly based on connection availability.
-
-### P9-02 Create ManualConnectWidget
-Goal: Allow manual server entry.
-Details: Create lib/presentation/screens/connect/manual_connect_widget.dart. Provide fields for host, port, username, password, and buttons for test and connect. Validate inputs and show results.
-Acceptance: Manual connection can be tested and saved.
-
-### P9-03 Create ServerListWidget
-Goal: Show saved and discovered servers.
-Details: Create lib/presentation/screens/connect/server_list_widget.dart. List saved servers with delete action and discovered servers from mDNS. Tapping a server triggers connection.
-Acceptance: Saved and discovered servers render and connect on tap.
-
-### P9-04 Create ConnectScreen
-Goal: Combine manual and discovery connection flows.
-Details: Create lib/presentation/screens/connect/connect_screen.dart. Use tabs or segmented control to switch between manual entry and discovery list. Start and stop discovery appropriately.
-Acceptance: User can connect via manual or discovered server.
-
-### P9-05 Create ServerStatusWidget
-Goal: Display server health status.
-Details: Create lib/presentation/screens/home/server_status_widget.dart. Show server name, version, health badge, and a disconnect action. Consume serverHealthProvider and connectionStateProvider.
-Acceptance: Server status updates from provider data.
-
-### P9-06 Create HomeScreen
-Goal: Provide the main dashboard.
-Details: Create lib/presentation/screens/home/home_screen.dart. Show ServerStatusWidget, recent sessions list, and quick action buttons for new session, files, and settings.
-Acceptance: Home screen loads and navigates to core features.
-
-## Phase 10 - Sessions and Chat
-
-### P10-01 Create SessionTile widget
-Goal: Standardize session list items.
-Details: Create lib/presentation/screens/sessions/session_tile.dart. Show session title, timestamp, and status badge. Support tap and long-press actions.
-Acceptance: SessionTile displays correct metadata and status.
-
-### P10-02 Create NewSessionDialog
-Goal: Allow session creation.
-Details: Create lib/presentation/screens/sessions/new_session_dialog.dart. Provide title input and optional parent session selector. Create session on submit and navigate to chat.
-Acceptance: New session is created and navigated to chat.
-
-### P10-03 Create SessionsListScreen
-Goal: List and manage sessions.
-Details: Create lib/presentation/screens/sessions/sessions_list_screen.dart. Display list of sessions with pull-to-refresh and swipe-to-delete. Include FAB to create new session.
-Acceptance: Sessions list refreshes and deletes sessions correctly.
-
-### P10-04 Create ChatInput
-Goal: Provide message input UI.
-Details: Create lib/presentation/screens/chat/chat_input.dart. Include text input, send button, and model or agent selector. Disable send when empty or busy.
-Acceptance: ChatInput sends prompts and clears on success.
-
-### P10-05 Create TypingIndicator
-Goal: Show AI processing state.
-Details: Create lib/presentation/screens/chat/typing_indicator.dart. Render animated dots with terminal styling. Control visibility via a bool property.
-Acceptance: TypingIndicator animates and can be toggled.
-
-### P10-06 Create PartRenderer
-Goal: Render individual message parts.
-Details: Create lib/presentation/screens/chat/part_renderer.dart. Render text with MarkdownRenderer, toolUse and toolResult with ToolCallWidget, and thinking blocks with muted styling.
-Acceptance: Each Part type renders correctly.
-
-### P10-07 Create ToolCallWidget
-Goal: Display tool usage and results.
-Details: Create lib/presentation/screens/chat/tool_call_widget.dart. Create an expandable card showing tool name, input JSON, output, and status. Include icons for pending, running, completed, and error states.
-Acceptance: ToolCallWidget expands and displays tool details clearly.
-
-### P10-08 Create MessageBubble
-Goal: Display a complete chat message.
-Details: Create lib/presentation/screens/chat/message_bubble.dart. Render header with role and timestamp, and body with a list of PartRenderer outputs. Different styling for user vs assistant messages.
-Acceptance: MessageBubble shows message parts with correct alignment and style.
-
-### P10-09 Create ChatScreen
-Goal: Provide the chat experience for a session.
-Details: Create lib/presentation/screens/chat/chat_screen.dart. Show list of messages, typing indicator, and ChatInput. Listen to SSE events for live updates. Provide session actions in the app bar.
-Acceptance: ChatScreen loads messages, sends prompts, and updates in real time.
-
-## Phase 11 - SSE Integration
-
-### P11-01 Wire SSE to session providers
-Goal: Keep session data in sync with SSE updates.
-Details: In event handler provider, invalidate sessionsListProvider and sessionDetailProvider when sessionUpdated events arrive. Update session status provider on status events.
-Acceptance: Sessions UI updates when SSE events occur.
-
-### P11-02 Wire SSE to message providers
-Goal: Keep message data in sync with SSE updates.
-Details: In event handler provider, invalidate messagesProvider when messageUpdated or partUpdated events arrive. Use sessionId from the event to target the correct provider.
-Acceptance: Chat UI reflects message updates without manual refresh.
-
-### P11-03 Wire SSE to typing indicator
-Goal: Show and hide typing indicator based on session status.
-Details: Implement a sessionIsTypingProvider that derives from sessionStatusesProvider and exposes a bool for busy status. Bind TypingIndicator visibility to this provider.
-Acceptance: Typing indicator appears while the assistant is processing.
-
-## Phase 12 - File Browser
-
-### P12-01 Create FileTreeWidget
-Goal: Render a file tree structure.
-Details: Create lib/presentation/screens/files/file_tree_widget.dart. Show folders with expand and collapse behavior, files with tap handling. Sort directories first, then files.
-Acceptance: FileTreeWidget expands folders and opens files.
-
-### P12-02 Create FileContentScreen
-Goal: View file contents.
-Details: Create lib/presentation/screens/files/file_content_screen.dart. Fetch file content with fileContentProvider and render using CodeBlock. Add copy button and breadcrumb path display.
-Acceptance: File content renders with syntax highlighting and copy support.
-
-### P12-03 Create FileBrowserScreen
-Goal: Provide the main file browsing UI.
-Details: Create lib/presentation/screens/files/file_browser_screen.dart. Combine search bar, file tree view, and navigation breadcrumbs. Search calls findFiles and displays results.
-Acceptance: FileBrowserScreen supports navigation and search.
-
-## Phase 13 - Settings
-
-### P13-01 Create ServerConfigScreen
-Goal: Manage saved server connections.
-Details: Create lib/presentation/screens/settings/server_config_screen.dart. Show saved servers, allow test and delete actions, and set default server. Provide add server flow.
-Acceptance: Server configs can be edited and deleted.
-
-### P13-02 Create SettingsScreen
-Goal: Provide a settings hub.
-Details: Create lib/presentation/screens/settings/settings_screen.dart. Include server config navigation, notification toggles, about section, and cache clearing actions.
-Acceptance: SettingsScreen links to key configuration actions.
-
-## Phase 14 - Firebase and Rust Notifier
-
-### P14-01 Configure Firebase project
-Goal: Enable Firebase Cloud Messaging.
-Details: Add google-services.json to android/app and GoogleService-Info.plist to ios/Runner. Update Android Gradle to apply Google Services plugin. Update iOS deployment target if required. Run flutter pub get and verify build.
-Acceptance: Firebase config files are present and builds succeed.
-
-### P14-02 Implement FCM token registration
-Goal: Register devices with the Rust notifier.
-Details: On app start, request FCM token and call NotificationRepository.registerDevice. Listen to token refresh and re-register. Persist the last registered token.
-Acceptance: Device token is registered and updated on refresh.
-
-### P14-03 Implement notification deep links
-Goal: Navigate to sessions from notifications.
-Details: Handle getInitialMessage, onMessageOpenedApp, and onMessage. Extract sessionId from payload and navigate to /chat/:sessionId. Show in-app banner for foreground messages.
-Acceptance: Notification taps route to the correct session.
-
-### P14-04 Scaffold Rust notifier project
-Goal: Initialize the Rust notifier codebase.
-Details: Create rust_notifier/ with cargo init. Add dependencies for tokio, reqwest, serde, toml, axum, tracing, and reqwest-eventsource. Build successfully.
-Acceptance: rust_notifier builds without errors.
-
-### P14-05 Create Rust config module
-Goal: Load configuration from TOML.
-Details: Create rust_notifier/src/config.rs with Config struct for OpenCode URL, optional auth, FCM service account path, and listen host/port. Add a load() helper.
-Acceptance: Config loads from TOML and validates required fields.
-
-### P14-06 Create Rust models module
-Goal: Define shared request and event types.
-Details: Create rust_notifier/src/models.rs with DeviceRegistration, FcmPayload, SseEvent, and HealthResponse types. Derive Serialize and Deserialize.
-Acceptance: Models compile and support JSON serialization.
-
-### P14-07 Create device registry
-Goal: Store registered device tokens.
-Details: Create rust_notifier/src/device_registry.rs with an Arc<RwLock<HashMap>> and file persistence. Implement register, unregister, get_all, load, and save.
-Acceptance: Registry persists tokens and supports concurrent access.
-
-### P14-08 Create notifier API
-Goal: Expose device registration endpoints.
-Details: Create rust_notifier/src/api.rs using axum. Implement POST /devices/register, DELETE /devices/:token, and GET /health. Add logging middleware.
-Acceptance: API endpoints return expected status codes and payloads.
-
-### P14-09 Create SSE listener
-Goal: Consume OpenCode server events.
-Details: Create rust_notifier/src/sse_listener.rs using reqwest-eventsource. Implement reconnect with backoff. Parse event data into SseEvent and filter for notification-worthy events.
-Acceptance: Listener connects, parses events, and reconnects on failures.
-
-### P14-10 Create FCM sender
-Goal: Send FCM push notifications.
-Details: Create rust_notifier/src/fcm_sender.rs. Load service account credentials, obtain OAuth token, and send messages to tokens with notification + data payload. Refresh token on expiry.
-Acceptance: FCM sender can deliver notifications to registered tokens.
-
-### P14-11 Wire Rust notifier end to end
-Goal: Run API server and SSE listener together.
-Details: Update rust_notifier/src/main.rs to load config, initialize registry and sender, start API server, and spawn SSE listener loop that sends notifications.
-Acceptance: Rust notifier runs and sends notifications on relevant events.
-
-### P14-12 Add Rust notifier config example and README
-Goal: Document configuration and usage.
-Details: Create rust_notifier/config.example.toml with comments. Write rust_notifier/README.md with setup, build, run, and API usage.
-Acceptance: Documentation is clear and sufficient to run the notifier.
-
-## Phase 15 - Polish and Test Hardening
-
-### P15-01 Add auth interceptor to Dio
-Goal: Attach Basic Auth headers to API requests.
-Details: Implement AuthInterceptor in dio_client.dart. Read credentials from secure storage, encode to Base64, and set Authorization header. Map 401 and 403 to AuthException.
-Acceptance: Requests include Authorization header when credentials are present.
-
-### P15-02 Add auto-reconnect logic
-Goal: Recover from connection drops.
-Details: In connectionStateProvider, implement reconnect with exponential backoff. Stop after max attempts and surface an error state. Reinitialize SSE stream on success.
-Acceptance: App automatically reconnects and updates connection state.
-
-### P15-03 Add pull-to-refresh
-Goal: Refresh list data easily.
-Details: Add RefreshIndicator to sessions list, file browser, and home screen. On refresh, invalidate the relevant providers.
-Acceptance: Pull-to-refresh triggers data reloads without errors.
-
-### P15-04 Add haptic feedback
-Goal: Improve tactile interactions.
-Details: Add light haptics on send, button taps, and notifications. Add medium and heavy haptics for session creation and connect or disconnect actions. Centralize in a HapticService.
-Acceptance: Haptics fire for key actions without blocking UI.
-
-### P15-05 Add consistent loading and error states
-Goal: Standardize UI feedback.
-Details: Ensure every AsyncValue uses LoadingIndicator and AppErrorWidget for loading and error states. Remove any ad-hoc spinners or error text.
-Acceptance: All screens use consistent loading and error components.
-
-### P15-06 Unit test coverage audit for models
-Goal: Validate remaining gaps in model serialization tests.
-Details: Audit model test coverage and add missing unit tests for Freezed DTOs and serializers, focusing on edge cases not already covered earlier.
-Acceptance: Model tests cover edge cases and any uncovered DTOs.
-
-### P15-07 Unit tests for repositories
-Goal: Validate repository behavior.
-Details: Mock datasources and test network behavior, error mapping, and local storage interactions for saved servers and credentials where applicable.
-Acceptance: Repository tests pass and cover success and failure cases.
-
-### P15-08 Unit tests for providers
-Goal: Validate provider logic.
-Details: Use ProviderContainer to test provider outputs, state transitions, and invalidations on SSE events. Override repositories with mocks.
-Acceptance: Provider tests pass and reflect correct state behavior.
-
-### P15-09 Widget tests for building blocks
-Goal: Validate reusable widgets.
-Details: Test TerminalText, ConnectionBadge, AppButton, AppErrorWidget, LoadingIndicator for correct rendering and interactions.
-Acceptance: Widget tests pass for all building blocks.
-
-### P15-10 Widget tests for key screens
-Goal: Validate screen UI behavior.
-Details: Test ConnectScreen, SessionsListScreen, and ChatScreen with provider overrides for loading, data, and error states.
-Acceptance: Screen widget tests pass with expected UI states.
-
-### P15-11 Integration test: connect to chat flow
-Goal: Validate end-to-end app flow.
-Details: Use integration_test to simulate connect, navigate to home, open session, send message, and receive response. Expand coverage with additional edge cases beyond the initial integration tests.
-Acceptance: Integration tests pass and verify core flow with additional coverage.
-
-### P15-12 Integration test: notification deep link
-Goal: Validate notification navigation.
-Details: Simulate FCM notification payload with sessionId and ensure app navigates to the correct chat screen from cold start and background. Extend tests for edge cases and error handling.
-Acceptance: Deep link behavior works for both entry paths and edge cases.
+Testing policy: Unit and integration tests are important from the beginning and should be added alongside each feature, in the same PR that implements the feature.
+
+## Structure (Aug 2026)
+
+Tickets are organized **by feature**, not by technical layer. Each feature is a vertical slice: it builds exactly the models, datasources, repositories, providers, and UI it needs — **when it needs them**. Nothing is built ahead of time (no model phases, no datasource phases). If a model type is not consumed by a shipped feature, it does not exist yet.
+
+---
+
+## Old Ticket Map
+
+The original phase-based tickets were restructured into features. Mapping so nothing is lost:
+
+| Old ticket | Where it went |
+|---|---|
+| P1-01..P1-11 (bootstrap) | Completed (below) |
+| P2-01..P2-10 (widgets) | Completed (below) |
+| P3-01 Dio client | F0 Foundation |
+| P3-02 Firebase service | F6 Push Notifications |
+| P3-03 mDNS discovery | Completed (below) |
+| P3-04 Crashlytics | F7 Polish |
+| P4-01 Chat data models | Merged (PR #48); owned by F2/F3 |
+| P4-02 Config/Provider/Agent models | F3 Chat (model/agent selector) |
+| P4-03 File & search models | F4 File Browser |
+| P4-04 Server models & events | Split: health → F1, events → F3, **project model dropped for v1** |
+| P4-09 NotificationToken | F6 Push Notifications |
+| P5-01..P5-03 Datasources | Split across F1/F2/F3/F4/F6 |
+| P6-01..P6-06 Repositories | Split across F1/F2/F3/F4/F6 |
+| P7-01..P7-09 Providers | Split across F1/F2/F3/F4/F6 |
+| P8-01..P8-03 Routing & shell | F0 Foundation |
+| P9-01..P9-06 Connect/Home | F1 Connect & Dashboard |
+| P10-01..P10-09 Sessions/Chat | F2 Sessions, F3 Chat |
+| P11-01..P11-03 SSE | F3 Chat |
+| P12-01..P12-03 File browser | F4 File Browser |
+| P13-01..P13-02 Settings | F5 Settings |
+| P14-01..P14-12 Firebase + Rust | F6 Push Notifications |
+| P15-01..P15-12 Polish & tests | F7 Polish |
+
+---
+
+## Completed
+
+### P1 - Project Bootstrap
+- P1-01 Dependencies, P1-02 Folder structure, P1-03 api_constants, P1-04 app_constants, P1-05 app_colors, P1-06 app_typography, P1-07 app_theme, P1-08 app_exception, P1-09 error_handler (+ tests), P1-10 logger, P1-11 extensions. All merged.
+
+### P2 - UI Building Blocks
+- P2-01 TerminalText, P2-02 CodeBlock, P2-03 LoadingIndicator, P2-04 AppErrorWidget, P2-05 ConnectionBadge, P2-06 MarkdownRenderer, P2-07 TerminalAppBar, P2-08 AppButton, P2-09 widget tests, P2-10 error snackbar system, P2-00 Widgetbook. All merged.
+
+### P3-03 - mDNS Discovery Service
+- mDNS discovery service + debug screen (#40). Merged.
+
+### P4-01 - Chat Data Models (merged, PR #48)
+- `Session`, `SessionStatus` (idle|busy|retry), `CreateSessionInput`, nested types in `session.dart`.
+- `MessagePart` union: text, reasoning, tool (ToolState pending/running/completed/error), step-start, step-finish + `OtherPart` fallback (`@Freezed(fallbackUnion: 'other')`).
+- `Message` union (User|Assistant), `MessageWithParts`, `MessageError`, `OutputFormat` in `message.dart`.
+- `models.dart` barrel; real JSON fixtures; 36 unit tests.
+- These models are consumed by F2 (Sessions) and F3 (Chat); no rework expected.
+
+---
+
+## F0 - Foundation: API Client & App Shell
+
+Goal: The shared infrastructure every feature depends on — a configured Dio client and the routing/app shell.
+Details:
+1. Create lib/services/dio_client.dart: Dio instance accepting baseUrl + optional credentials; timeouts; interceptors for logging, auth (Basic), and error mapping to AppException (map 401/403 to AuthException).
+2. Create lib/app.dart + lib/presentation/router/app_router.dart: GoRouter with splash + connect routes only; redirect logic based on connection state (routes for later features are added by their own tickets).
+3. Update lib/main.dart: ProviderScope wiring, minimal initialization.
+Acceptance: DioClient creates a functional configured instance. App boots through the router. Analyzer + tests pass.
+Testing: Unit tests for DioClient (baseUrl, timeouts, interceptor behavior with mocked Dio adapter).
+
+## F1 - Connect & Dashboard
+
+Goal: Connect to an OpenCode server (manual entry + mDNS discovery), persist saved servers, and show server health. **Models created here: ServerHealth, SavedServer (+ credentials).**
+Details:
+1. Models: ServerHealth {healthy, version} for GET /global/health; SavedServer + credentials (local, not API) for persistence.
+2. Datasource: local storage (shared_preferences for saved servers, flutter_secure_storage for credentials; CRUD).
+3. Repository: ServerRepository — connect, disconnect, health check, saved server list, delete, discovery stream.
+4. Providers: connection state notifier (connect/disconnect), server health polling, saved servers, mDNS discovery.
+5. UI: SplashScreen (auto-connect saved server), ConnectScreen (manual + discovered server list), HomeScreen with ServerStatusWidget (server name, version, health badge, disconnect).
+Acceptance: User can connect via manual entry or discovered server, persists across launches, and sees live health status on Home. Analyzer + tests pass.
+Testing: Unit tests for storage + repository with mocks; widget tests for Connect/Home screens with provider overrides.
+
+## F2 - Sessions
+
+Goal: List, create, and delete sessions. Consumes the P4-01 Session models (no new models).
+Details:
+1. Datasource: session endpoints — GET /session (with scope/search/limit query), POST /session, DELETE /session/:id, GET /session/status.
+2. Repository: SessionRepository — list, create, delete, status.
+3. Providers: sessions list, session statuses; invalidate on changes.
+4. UI: SessionsListScreen (pull-to-refresh, swipe-to-delete, FAB), SessionTile, NewSessionDialog. Home screen shows recent sessions (navigate to chat when F3 lands).
+Acceptance: Sessions list loads from the server, sessions can be created and deleted, statuses reflect busy/idle/retry. Analyzer + tests pass.
+Testing: Unit tests for repository with mocked datasource; widget tests for the list screen (loading/data/error states).
+
+## F3 - Chat
+
+Goal: Send prompts and view AI responses with live updates. Consumes P4-01 Message/Part models. **Models created here: ServerEvent envelope + typed events (SSE), Config/Provider/Agent models (model & agent selector in the input).**
+Details:
+1. Models: ServerEvent {id, type, properties} union — session.created/updated/deleted, message.updated/removed, message.part.updated/removed/delta, session.status/idle, session.error, server.connected + unknown fallback. AppConfig (subset of ConfigV1), ProviderListResult {all, default, connected}, ProviderInfo + nested Model, AgentInfo (mode subagent|primary|all).
+2. Datasources: message endpoints — GET /session/:id/message (limit/before pagination), POST /session/:id/message, POST /session/:id/prompt_async, POST /session/:id/abort; SSE client on /global/event with reconnect; config endpoints GET /config, GET /provider, GET /config/providers, GET /api/agent.
+3. Repositories: MessageRepository (list, send sync, send async), ConfigRepository (config, providers, agents), event stream handling.
+4. Providers: messages per session, send action, event stream → invalidate messages/statuses, typing indicator from session status, model/agent options.
+5. UI: ChatScreen, MessageBubble (role header + parts), PartRenderer (text/reasoning/tool/step + generic OtherPart row), ToolCallWidget (expandable, state icons), ChatInput (model/agent selector, busy gating), TypingIndicator, session detail view + abort action.
+Acceptance: Send a prompt and see the streamed response update live; tool calls render with state; typing indicator shows while busy; model/agent selection is sent with the prompt. Analyzer + tests pass.
+Testing: Unit tests for ServerEvent parsing, message pagination, provider invalidation on events; widget tests for chat screen, bubbles, tool calls, input.
+
+## F4 - File Browser
+
+Goal: Browse project files, view file content, and search. **Models created here: FileNode {name, path, absolute, type, ignored}, FileContent {type, content, diff?, patch?, encoding?, mimeType?}, FindMatch, FileStatus.**
+Details:
+1. Models: FileNode/FileContent/FindMatch/FileStatus matching GET /file, /file/content, /find, /find/file (returns string[]), /file/status.
+2. Datasource: file endpoints — GET /file?path=, GET /file/content?path=, GET /find?pattern=, GET /find/file?query=.
+3. Repository: FileRepository — list directory, read file, find files (no caching).
+4. Providers: directory listing, file content, search.
+5. UI: FileBrowserScreen (breadcrumbs + search), FileTreeWidget (tree built client-side from flat listing — dirs first, expand/collapse), FileContentScreen (CodeBlock rendering, copy button).
+Acceptance: Navigate directories, open files with syntax highlighting, search by name. Analyzer + tests pass.
+Testing: Unit tests for file/search models + repository; widget tests for tree and content screens.
+
+## F5 - Settings
+
+Goal: Manage saved servers and app preferences. Reuses F1's SavedServer models (no new models).
+Details:
+1. UI: SettingsScreen (server config navigation, notification toggles stub, about section), ServerConfigScreen (saved server CRUD — reuses ServerRepository from F1, test connection, delete, set default).
+2. Wire notification toggles to a persisted flag (prefs); the actual push plumbing lands in F6.
+Acceptance: Saved servers can be tested/deleted/defaulted; toggles persist. Analyzer + tests pass.
+Testing: Widget tests for both screens with provider overrides.
+
+## F6 - Push Notifications
+
+Goal: Firebase Cloud Messaging push notifications via the Rust notifier. **Models created here: NotificationToken.**
+Details:
+1. Model: NotificationToken {token, label, registeredAt} for the Rust notifier register API.
+2. Service: FirebaseService (P3-02) — initialize, getToken, onTokenRefresh, onMessage/OpenedApp/InitialMessage, guarded init so dev runs don't crash.
+3. Datasource: Rust notifier API client — POST /devices/register, DELETE /devices/:token, GET /health.
+4. Repository: NotificationRepository — register/unregister with token refresh handling.
+5. Providers: FCM token, registration state.
+6. Rust notifier: cargo scaffold, config module, models, device registry, axum API, SSE listener with backoff, FCM sender, main wiring, example config + README.
+7. Deep links: notification payload → sessionId → navigate to chat; in-app banner for foreground messages.
+8. Firebase project config: google-services.json / GoogleService-Info.plist.
+Acceptance: Device registers with the notifier, token refresh re-registers, notifications navigate to the right session. Analyzer + tests pass.
+Testing: Unit tests for NotificationToken + repository with mocked client; deep-link navigation test.
+
+## F7 - Polish
+
+Goal: Hardening and UX finish. **No new models.**
+Details:
+1. Haptics: HapticService — light on send/tap, medium/heavy on session create and connect/disconnect.
+2. Pull-to-refresh on sessions list, file browser, and home.
+3. Consistent loading/error states audit (LoadingIndicator + AppErrorWidget everywhere; remove ad-hoc spinners).
+4. Crashlytics (P3-04) + logger integration.
+5. Auto-reconnect with exponential backoff in connection state; SSE re-init on success.
+6. Test hardening: coverage audit for models/repos/providers/screens, integration tests for connect → chat and notification deep links.
+Acceptance: Consistent UX states, haptics present, reconnect works, integration tests pass. Analyzer passes.
