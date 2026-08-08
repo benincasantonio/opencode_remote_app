@@ -77,7 +77,7 @@ sealed class SessionStatus with _$SessionStatus {
 
 #### [NEW] `lib/data/models/part.dart`
 
-`MessagePart` (sealed union, discriminator `type`) — 12 variants sharing `id, sessionID, messageID` (partBase):
+`MessagePart` (sealed union, discriminator `type`, `fallbackUnion: 'other'`) — the chat UI renders these variants; everything else falls back to `OtherPart`:
 
 | Variant class | JSON type | Extra fields |
 |---|---|---|
@@ -86,20 +86,12 @@ sealed class SessionStatus with _$SessionStatus {
 | `ToolPart` | `tool` | callID, tool, state, metadata? |
 | `StepStartPart` | `step-start` | snapshot? |
 | `StepFinishPart` | `step-finish` | reason, snapshot?, cost, tokens |
-| `FilePart` | `file` | mime, filename?, url, source? |
-| `SnapshotPart` | `snapshot` | snapshot |
-| `PatchPart` | `patch` | hash, files (List\<String\>) |
-| `AgentPart` | `agent` | name, source? {value, start, end} |
-| `RetryPart` | `retry` | attempt, error (ApiError), time {created} |
-| `CompactionPart` | `compaction` | auto, overflow?, tail_start_id? (`@JsonKey(name: 'tail_start_id')`) |
-| `SubtaskPart` | `subtask` | prompt, description, agent, model?, command? |
+| `OtherPart` | *any other* | id, sessionID, messageID, type — absorbs file/snapshot/patch/agent/retry/compaction/subtask and future types without crashing (freezed `fallbackUnion`) |
 
 Additional unions in this file:
-- `ToolState` (discriminator `status`) — `pending{input,raw}` | `running{input,title?,metadata?,time}` | `completed{input,output,title,metadata,time,attachments?}` | `error{input,error,metadata?,time}`.
-- `FilePartSource` (discriminator `type`) — `file{path}` | `symbol{path,range,name,kind}` | `resource{clientName,uri}`; `Range{start{line,character},end{line,character}}`.
-- `ApiError` (pragmatic) — `{name, data: Map<String,dynamic>, message getter}`.
+- `ToolState` (discriminator `status`) — `pending{input,raw}` | `running{input,title?,metadata?,time}` | `completed{input,output,title,metadata,time}` | `error{input,error,metadata?,time}`.
 
-Unknown `type` values throw `FormatException` (fail fast on API drift).
+Unknown `type` values map to `OtherPart` (no exceptions on forward-compatible payloads).
 
 ### 2.4 Create `Message` models
 
@@ -137,12 +129,10 @@ Matches the existing barrel convention (`core/errors/errors.dart`, `services/ser
 6. CreateSessionInput serializes to the POST body shape.
 
 #### [NEW] `test/unit/data/models/part_test.dart`
-1. All 12 part variants parse from JSON.
-2. ToolState discrimination: pending, running, completed (with attachments), error.
-3. `tail_start_id` key mapping on CompactionPart.
-4. FilePartSource discrimination: file, symbol (with range), resource.
-5. Unknown part type throws FormatException.
-6. ApiError message getter reads data.message.
+1. Typed variants parse: text, reasoning, tool (completed state), step-start, step-finish.
+2. ToolState discrimination: pending, running, completed, error.
+3. Unknown part type falls back to OtherPart (id/sessionID/messageID/type preserved).
+4. Every typed variant round-trips through toJson.
 
 #### [NEW] `test/unit/data/models/message_test.dart`
 1. Message role discrimination: user and assistant.
