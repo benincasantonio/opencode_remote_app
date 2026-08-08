@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/core/constants/app_sizing.dart';
 import 'package:opencode_remote_app/core/theme/app_colors.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_button/app_button.dart';
@@ -10,6 +11,9 @@ void main() {
     testWidgets('renders AppButton for retry', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(message: 'Error', onRetry: () {}),
           ),
@@ -22,6 +26,9 @@ void main() {
     testWidgets('retry button has correct label', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(message: 'Error', onRetry: () {}),
           ),
@@ -38,6 +45,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(
               message: 'Error',
@@ -56,6 +66,9 @@ void main() {
     testWidgets('full mode has correct background color', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(message: 'Error', onRetry: () {}),
           ),
@@ -76,6 +89,9 @@ void main() {
     testWidgets('full mode has correct padding', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(message: 'Error', onRetry: () {}),
           ),

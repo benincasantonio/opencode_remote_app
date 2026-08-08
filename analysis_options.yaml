@@ -5,24 +5,51 @@
 # IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
 # invoked from the command line by running `flutter analyze`.
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+analyzer:
+  plugins:
+    - custom_lint
+  errors:
+    # Any deprecated Flutter API usage must fail analysis.
+    deprecated_member_use: error
+  exclude:
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+    # Intentionally uses deprecated APIs; analyzed separately by the
+    # regression test (see test/unit/core/analyzer_lint_regression_test.dart).
+    - 'test/fixtures/**'
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+linter:
+  rules:
+    avoid_print: true
+    prefer_relative_imports: true
+    prefer_single_quotes: true
+    use_decorated_box: true
+
+# Custom lint plugins: riverpod_lint (via custom_lint) + leancode_lint.
+#
+# leancode_lint rules are opt-in: only the Riverpod-compatible rules are
+# enabled below; Bloc/hook/design-system rules are disabled.
+#
+# Note: `avoid_context_read_in_build` and `prefer_abstract_final_class` are
+# only available in leancode_lint >= 25, which requires analyzer ^13 and is
+# currently incompatible with custom_lint (analyzer ^8). They will be enabled
+# here once the toolchain catches up. The `abstract final class` convention is
+# already enforced manually in this codebase.
+custom_lint:
+  rules:
+    - start_comments_with_space
+    - catch_parameter_names
+    - avoid_single_child_in_multi_child_widgets
+    - use_dedicated_media_query_methods
+    - add_cubit_suffix_for_your_cubits: false
+    - avoid_conditional_hooks: false
+    - constructor_parameters_and_fields_should_have_the_same_order: false
+    - hook_widget_does_not_use_hooks: false
+    - prefer_center_over_align: false
+    - prefix_widgets_returning_slivers: false
+    - use_align: false
+    - use_design_system_item: false
+    - use_instead_type: false
+    - use_padding: false

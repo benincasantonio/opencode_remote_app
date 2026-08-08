@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
-import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_badge.dart';
-import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../connection_badge/connection_badge.dart';
+import '../connection_badge/connection_status.dart';
 
 /// A terminal-styled app bar that wraps Flutter's [AppBar] with a subtle
 /// bottom border and optional [ConnectionBadge].

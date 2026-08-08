@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_bar/terminal_app_bar.dart';
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_badge.dart';
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
@@ -9,6 +10,9 @@ void main() {
     testWidgets('renders title text', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(appBar: TerminalAppBar(title: 'My Title')),
         ),
       );
@@ -19,6 +23,9 @@ void main() {
     testWidgets('shows ConnectionBadge when enabled', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             appBar: const TerminalAppBar(
               title: 'Test',
@@ -35,6 +42,9 @@ void main() {
     testWidgets('hides ConnectionBadge when disabled', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             appBar: const TerminalAppBar(
               title: 'Test',
@@ -52,6 +62,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             appBar: TerminalAppBar(title: 'Test', leading: customLeading),
           ),
@@ -66,6 +79,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             appBar: TerminalAppBar(
               title: 'Test',
@@ -88,6 +104,9 @@ void main() {
     testWidgets('passes serverName to ConnectionBadge', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             appBar: const TerminalAppBar(
               title: 'Test',
@@ -105,6 +124,9 @@ void main() {
     testWidgets('passes connectionStatus to ConnectionBadge', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             appBar: const TerminalAppBar(
               title: 'Test',

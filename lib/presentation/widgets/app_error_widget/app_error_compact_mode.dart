@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
+
+import '../../../core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/context_extensions.dart';
 
 class AppErrorCompactMode extends StatelessWidget {
   const AppErrorCompactMode({super.key, required this.message, this.onRetry});
@@ -43,7 +45,7 @@ class AppErrorCompactMode extends StatelessWidget {
               iconSize: AppSizing.iconSmall,
               color: AppColors.textSecondary,
               onPressed: onRetry,
-              tooltip: 'Retry',
+              tooltip: context.l10n.retry,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),

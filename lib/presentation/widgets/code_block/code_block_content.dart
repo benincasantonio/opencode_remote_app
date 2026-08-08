@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
-import 'package:opencode_remote_app/core/constants/syntax_theme_constants.dart';
+import '../../../core/constants/syntax_theme_constants.dart';
 
 class CodeBlockContent extends StatelessWidget {
   final String code;

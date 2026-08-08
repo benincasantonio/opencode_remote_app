@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
-import 'package:opencode_remote_app/presentation/widgets/app_button/app_button.dart';
-import 'package:opencode_remote_app/presentation/widgets/app_button/app_button_variant.dart';
+import '../../../core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/context_extensions.dart';
+import '../app_button/app_button.dart';
+import '../app_button/app_button_variant.dart';
 
 class AppErrorFullMode extends StatelessWidget {
   const AppErrorFullMode({super.key, required this.message, this.onRetry});
@@ -35,7 +36,7 @@ class AppErrorFullMode extends StatelessWidget {
           if (onRetry != null) ...[
             const SizedBox(height: AppSizing.gapLarge),
             AppButton(
-              label: 'Retry',
+              label: context.l10n.retry,
               onPressed: onRetry,
               variant: AppButtonVariant.secondary,
               icon: Icons.refresh,

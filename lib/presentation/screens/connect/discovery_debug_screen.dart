@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/context_extensions.dart';
 import '../../../services/services.dart';
 import '../../widgets/app_bar/terminal_app_bar.dart';
 
@@ -51,9 +52,9 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
           });
         },
       );
-    } catch (error) {
+    } catch (err) {
       setState(() {
-        _error = error;
+        _error = err;
         _isDiscovering = false;
       });
     }
@@ -73,8 +74,8 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const TerminalAppBar(
-        title: 'mDNS Discovery',
+      appBar: TerminalAppBar(
+        title: context.l10n.discoveryTitle,
         showConnectionBadge: false,
       ),
       body: Column(
@@ -86,14 +87,14 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _isDiscovering ? null : _start,
-                    child: const Text('Start'),
+                    child: Text(context.l10n.start),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _isDiscovering ? _stop : null,
-                    child: const Text('Stop'),
+                    child: Text(context.l10n.stop),
                   ),
                 ),
               ],
@@ -109,7 +110,7 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
             child: Row(
               children: [
                 Text(
-                  _isDiscovering ? 'DISCOVERING' : 'IDLE',
+                  _isDiscovering ? context.l10n.discovering : context.l10n.idle,
                   style: AppTypography.label.copyWith(
                     color: _isDiscovering
                         ? AppColors.success
@@ -118,7 +119,7 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  '${_servers.length} server(s)',
+                  context.l10n.serverCount(_servers.length),
                   style: AppTypography.label,
                 ),
               ],
@@ -130,8 +131,8 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
                 ? Center(
                     child: Text(
                       _isDiscovering
-                          ? 'Searching for servers…'
-                          : 'No servers yet.\nTap Start to begin discovery.',
+                          ? context.l10n.searchingForServers
+                          : context.l10n.noServersYet,
                       textAlign: TextAlign.center,
                       style: AppTypography.bodyMedium,
                     ),
@@ -163,17 +164,12 @@ class _ServerTile extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${server.host}:${server.port}',
-            style: AppTypography.codeSmall,
-          ),
+          Text('${server.host}:${server.port}', style: AppTypography.codeSmall),
           if (attributes.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                attributes.entries
-                    .map((e) => '${e.key}=${e.value}')
-                    .join('  '),
+                attributes.entries.map((e) => '${e.key}=${e.value}').join('  '),
                 style: AppTypography.bodySmall,
               ),
             ),

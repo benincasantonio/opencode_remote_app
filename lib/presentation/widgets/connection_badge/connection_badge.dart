@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
-import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
+
+import '../../../core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/context_extensions.dart';
+import 'connection_status.dart';
 
 class ConnectionBadge extends StatefulWidget {
   const ConnectionBadge({super.key, required this.status, this.serverName});
@@ -65,11 +67,12 @@ class _ConnectionBadgeState extends State<ConnectionBadge>
   }
 
   String _label() {
+    final l10n = context.l10n;
     return switch (widget.status) {
-      ConnectionStatus.connected => 'Connected',
-      ConnectionStatus.connecting => 'Connecting…',
-      ConnectionStatus.disconnected => 'Disconnected',
-      ConnectionStatus.error => 'Error',
+      ConnectionStatus.connected => l10n.statusConnected,
+      ConnectionStatus.connecting => l10n.statusConnecting,
+      ConnectionStatus.disconnected => l10n.statusDisconnected,
+      ConnectionStatus.error => l10n.statusError,
     };
   }
 
@@ -109,4 +112,3 @@ class _ConnectionBadgeState extends State<ConnectionBadge>
     );
   }
 }
-

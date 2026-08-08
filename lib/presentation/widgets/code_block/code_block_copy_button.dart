@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
+
+import '../../../core/constants/app_sizing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/context_extensions.dart';
 
 class CodeBlockCopyButton extends StatefulWidget {
   final String code;
@@ -51,7 +53,7 @@ class _CodeBlockCopyButtonState extends State<CodeBlockCopyButton> {
         size: AppSizing.iconSmall,
       ),
       onPressed: _handleCopy,
-      tooltip: 'Copy code',
+      tooltip: context.l10n.copyCode,
       splashRadius: AppSizing.iconSmall,
     );
   }

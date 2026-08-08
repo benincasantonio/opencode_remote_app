@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:opencode_remote_app/presentation/widgets/code_block/code_block.dart';
+import '../code_block/code_block.dart';
 
 class MarkdownCodeBuilder extends MarkdownElementBuilder {
   @override

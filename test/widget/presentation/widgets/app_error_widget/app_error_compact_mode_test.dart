@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_error_widget/app_error_widget.dart';
 
 void main() {
@@ -8,6 +8,9 @@ void main() {
     testWidgets('compact mode renders smaller error icon', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(
               message: 'Error',
@@ -26,6 +29,9 @@ void main() {
     testWidgets('compact mode uses IconButton for retry', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(
               message: 'Error',
@@ -44,6 +50,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+
           home: Scaffold(
             body: AppErrorWidget(
               message: 'Error',

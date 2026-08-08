@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 import 'package:opencode_remote_app/core/theme/app_theme.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 
 import 'main.directories.g.dart';
 
@@ -19,6 +20,10 @@ class WidgetbookApp extends StatelessWidget {
       directories: directories,
       addons: [
         ViewportAddon(Viewports.all),
+        LocalizationAddon(
+          locales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+        ),
         MaterialThemeAddon(
           themes: [WidgetbookTheme(name: 'Dark', data: AppTheme.dark())],
         ),

@@ -6,14 +6,14 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 @widgetbook.UseCase(name: 'Default', type: CodeBlock)
 Widget defaultCodeBlock(BuildContext context) {
-  return Container(
+  return SizedBox(
     width: double.infinity,
     child: CodeBlock(
       code: context.knobs.string(
         label: 'Code',
         initialValue: 'void main() {\n  print("Hello, world!");\n}',
       ),
-      language: context.knobs.list(
+      language: context.knobs.object.dropdown(
         label: 'Language',
         options: Syntax.values,
         initialOption: Syntax.DART,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import 'loading_indicator_size.dart';
 
 class LoadingIndicator extends StatelessWidget {

@@ -1,0 +1,25 @@
+{
+  "@@locale": "en",
+  "appTitle": "OpenCode Remote",
+  "retry": "Retry",
+  "copyCode": "Copy code",
+  "statusConnected": "Connected",
+  "statusConnecting": "Connecting…",
+  "statusDisconnected": "Disconnected",
+  "statusError": "Error",
+  "discoveryTitle": "mDNS Discovery",
+  "start": "Start",
+  "stop": "Stop",
+  "discovering": "DISCOVERING",
+  "idle": "IDLE",
+  "serverCount": "{count, plural, =1{1 server} other{{count} servers}}",
+  "@serverCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchingForServers": "Searching for servers…",
+  "noServersYet": "No servers yet.\nTap Start to begin discovery."
+}

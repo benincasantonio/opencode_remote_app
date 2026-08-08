@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:opencode_remote_app/core/utils/logger.dart';
 
@@ -65,9 +64,9 @@ void main() {
     test('Logger.error logs with error and stackTrace', () {
       try {
         throw Exception('Test error');
-      } catch (e, s) {
+      } catch (err, st) {
         expect(
-          () => Logger.error('Error message', error: e, stackTrace: s),
+          () => Logger.error('Error message', error: err, stackTrace: st),
           returnsNormally,
         );
       }
@@ -83,12 +82,12 @@ void main() {
     test('Logger.error logs with all parameters', () {
       try {
         throw Exception('Test error');
-      } catch (e, s) {
+      } catch (err, st) {
         expect(
           () => Logger.error(
             'Error message',
-            error: e,
-            stackTrace: s,
+            error: err,
+            stackTrace: st,
             context: {'userId': '123', 'action': 'login'},
           ),
           returnsNormally,

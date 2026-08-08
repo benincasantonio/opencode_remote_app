@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:opencode_remote_app/core/theme/app_typography.dart';
+import '../../../core/theme/app_typography.dart';
 
 class TerminalText extends StatelessWidget {
   final String text;

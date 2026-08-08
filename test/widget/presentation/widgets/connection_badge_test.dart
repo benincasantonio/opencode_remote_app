@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/core/theme/app_colors.dart';
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_badge.dart';
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
@@ -12,6 +13,9 @@ void main() {
         (tester) async {
           await tester.pumpWidget(
             const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+
               home: Scaffold(
                 body: ConnectionBadge(status: ConnectionStatus.connected),
               ),
@@ -33,6 +37,9 @@ void main() {
         (tester) async {
           await tester.pumpWidget(
             const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+
               home: Scaffold(
                 body: ConnectionBadge(status: ConnectionStatus.connecting),
               ),
@@ -54,6 +61,9 @@ void main() {
         (tester) async {
           await tester.pumpWidget(
             const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+
               home: Scaffold(
                 body: ConnectionBadge(status: ConnectionStatus.disconnected),
               ),
@@ -75,6 +85,9 @@ void main() {
       ) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.error),
             ),
@@ -95,6 +108,9 @@ void main() {
       testWidgets('shows server name when provided', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(
                 status: ConnectionStatus.connected,
@@ -111,6 +127,9 @@ void main() {
       testWidgets('hides server name when null', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(
                 status: ConnectionStatus.connected,
@@ -131,6 +150,9 @@ void main() {
       ) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.connecting),
             ),
@@ -144,6 +166,9 @@ void main() {
       testWidgets('can pump through animation cycles', (tester) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.connecting),
             ),
@@ -162,6 +187,9 @@ void main() {
       ) async {
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.connected),
             ),
@@ -173,6 +201,9 @@ void main() {
 
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.connecting),
             ),
@@ -184,6 +215,9 @@ void main() {
 
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.error),
             ),
@@ -195,6 +229,9 @@ void main() {
 
         await tester.pumpWidget(
           const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+
             home: Scaffold(
               body: ConnectionBadge(status: ConnectionStatus.disconnected),
             ),

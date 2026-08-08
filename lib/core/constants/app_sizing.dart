@@ -2,9 +2,7 @@
 ///
 /// All widgets should use these constants instead of hardcoded values
 /// for consistent spacing and maintainability.
-class AppSizing {
-  AppSizing._();
-
+abstract final class AppSizing {
   static const gapTiny = 4.0;
   static const gapSmall = 8.0;
   static const gapMedium = 12.0;
