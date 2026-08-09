@@ -77,6 +77,8 @@ dev_dependencies:
   custom_lint: ^0.8.1
   riverpod_lint: ^3.1.0
   leancode_lint: ^19.0.1
+  opencode_lints:
+    path: packages/opencode_lints
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

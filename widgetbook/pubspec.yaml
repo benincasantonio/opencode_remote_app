@@ -20,6 +20,9 @@ dev_dependencies:
   widgetbook_annotation: ^3.11.0
   widgetbook_generator: ^3.22.0
   build_runner: ^2.12.2
+  custom_lint: ^0.8.1
+  opencode_lints:
+    path: ../packages/opencode_lints
 
 flutter:
   uses-material-design: true
