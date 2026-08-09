@@ -21,5 +21,41 @@
     }
   },
   "searchingForServers": "Searching for servers…",
-  "noServersYet": "No servers yet.\nTap Start to begin discovery."
+  "noServersYet": "No servers yet.\nTap Start to begin discovery.",
+  "connectTitle": "Connect",
+  "openDiscoveryDebug": "Open mDNS Discovery",
+  "hostLabel": "Host",
+  "portLabel": "Port",
+  "usernameLabel": "Username (optional)",
+  "passwordLabel": "Password (optional)",
+  "connectButton": "Connect",
+  "hostRequired": "Enter a host",
+  "portRequired": "Enter a port",
+  "portInvalid": "Enter a valid port (1–65535)",
+  "connectErrorAuth": "Authentication failed. Check username and password.",
+  "connectErrorNetwork": "Could not reach the server. Check host and port.",
+  "connectErrorTimeout": "Connection timed out. Try again.",
+  "connectErrorServer": "Server error: {message}",
+  "@connectErrorServer": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "connectErrorGeneric": "Something went wrong. Try again.",
+  "homeTitle": "Home",
+  "connectedServerLabel": "Connected server",
+  "serverHealthLabel": "Health",
+  "serverHealthy": "Healthy",
+  "serverUnhealthy": "Unhealthy",
+  "serverVersion": "Version {version}",
+  "@serverVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "serverHealthUnavailable": "Health information unavailable"
 }

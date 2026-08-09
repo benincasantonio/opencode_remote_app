@@ -4,12 +4,12 @@ Feature-first execution: each feature is a vertical slice (models → datasource
 
 ## F0 — Foundation: API Client & App Shell
 - Configured Dio client (auth, logging, error mapping).
-- GoRouter skeleton + app shell (splash, connect) with redirects.
+- GoRouter skeleton + app shell (`/connect` initial route) with connection-based redirects. No Flutter splash in F0 (OS launch screens cover startup; F1 owns auto-connect UI).
 
 ## F1 — Connect & Dashboard
 - Manual + mDNS connection, saved servers with secure credentials.
 - Health polling and status display.
-- Splash auto-connect; Home dashboard with server status.
+- Splash auto-connect loading (on Connect or dedicated surface); Home dashboard with server status.
 
 ## F2 — Sessions
 - List, create, delete sessions; statuses (idle/busy/retry).

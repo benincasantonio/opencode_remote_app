@@ -9,4 +9,7 @@ abstract final class ApiConstants {
   static const Duration sendTimeout = Duration(seconds: 10);
 
   static const Duration sseReconnectDelay = Duration(seconds: 3);
+
+  /// GET /global/health — server health and version.
+  static const String healthPath = '/global/health';
 }
