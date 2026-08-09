@@ -3,14 +3,14 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   plugins:
     - custom_lint
-  errors:
-    depend_on_referenced_packages: ignore
 
 custom_lint:
   rules:
     - file_size_signal:
-      max_lines: 400
-    # Demo copy in use cases is not shipped UI.
-    - avoid_raw_string_in_widgets: false
+      max_lines: 30
+    - avoid_raw_string_in_widgets:
+      targets:
+        AppButton: [label]
+        TerminalAppBar: [title]
     - avoid_widget_returning_methods
     - models_are_dtos

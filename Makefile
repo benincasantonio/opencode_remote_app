@@ -1,4 +1,4 @@
-.PHONY: generate generate-clean android android-debug android-release android-appbundle ios clean install format analyze test test-quick test-unit test-widget widgetbook-generate check-widgetbook-registration help
+.PHONY: generate generate-clean android android-debug android-release android-appbundle ios clean install format analyze custom-lint test test-quick test-unit test-widget widgetbook-generate check-widgetbook-registration help
 
 generate:
 	@echo "Generating files with build_runner..."
@@ -56,6 +56,8 @@ install:
 	@echo "Installing dependencies..."
 	flutter pub get
 	cd widgetbook && flutter pub get
+	cd packages/opencode_lints && dart pub get
+	cd packages/opencode_lints/example && flutter pub get
 
 format:
 	@echo "Formatting Dart files..."
@@ -64,6 +66,10 @@ format:
 analyze:
 	@echo "Analyzing Dart files..."
 	flutter analyze
+
+custom-lint:
+	@echo "Running custom_lint..."
+	dart run custom_lint
 
 test:
 	@echo "Running all tests..."
@@ -97,6 +103,7 @@ help:
 	@echo "  make install           - Install dependencies"
 	@echo "  make format            - Format Dart files"
 	@echo "  make analyze           - Analyze Dart files"
+	@echo "  make custom-lint       - Run custom_lint (opencode_lints + riverpod/leancode)"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test             - Run all tests"

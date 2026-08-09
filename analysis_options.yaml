@@ -53,3 +53,12 @@ custom_lint:
     - use_design_system_item: false
     - use_instead_type: false
     - use_padding: false
+    # opencode_lints
+    - file_size_signal:
+      max_lines: 400
+    - avoid_raw_string_in_widgets:
+      targets:
+        AppButton: [label]
+        TerminalAppBar: [title]
+    - avoid_widget_returning_methods
+    - models_are_dtos

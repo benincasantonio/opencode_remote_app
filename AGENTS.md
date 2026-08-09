@@ -382,13 +382,20 @@ dev_dependencies:
 - **Generated files are never committed**: `*.g.dart`, `*.freezed.dart`, and generated l10n files (`lib/l10n/app_localizations*.dart`) are gitignored; always run `make generate` before `make analyze`/`make test` — missing generated files fail analysis
 - **File location**: Generated files (`.g.dart`, `.freezed.dart`) are created in same directory as source files
 - **Usage**: Providers use generated classes, models use `.fromJson`/`.toJson()`
- 
+
+### Custom Lint (`packages/opencode_lints`)
+- **Plugin**: `opencode_lints` (via `custom_lint`) enforces project conventions the built-in linter cannot
+- **Rules**: `file_size_signal` (warning at >400 lines — signal, not a reason to split blindly), `avoid_raw_string_in_widgets`, `avoid_widget_returning_methods`, `models_are_dtos`
+- **Run**: `make custom-lint` (or `dart run custom_lint`) from the repo root
+- **Fixtures**: `packages/opencode_lints/example/` holds `// expect_lint` tests for every rule
+
 ## Build & Run Commands
 
 ```bash
 # Flutter app
 flutter pub get
 make generate   # build_runner + widgetbook + gen-l10n (always run before analyze/test)
+make custom-lint
 flutter run
 
 # Rust notifier
