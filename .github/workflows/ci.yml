@@ -120,6 +120,9 @@ jobs:
       - name: Generate Widgetbook
         run: make widgetbook-generate
 
+      - name: Analyze Widgetbook
+        run: cd widgetbook && flutter analyze --fatal-infos --fatal-warnings
+
   gate:
     name: CI gate
     needs: [changes, check, widgetbook]
