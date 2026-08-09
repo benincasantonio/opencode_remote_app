@@ -60,4 +60,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noServersYet => 'No servers yet.\nTap Start to begin discovery.';
+
+  @override
+  String get connectTitle => 'Connect';
+
+  @override
+  String get openDiscoveryDebug => 'Open mDNS Discovery';
+
+  @override
+  String get hostLabel => 'Host';
+
+  @override
+  String get portLabel => 'Port';
+
+  @override
+  String get usernameLabel => 'Username (optional)';
+
+  @override
+  String get passwordLabel => 'Password (optional)';
+
+  @override
+  String get connectButton => 'Connect';
+
+  @override
+  String get hostRequired => 'Enter a host';
+
+  @override
+  String get portRequired => 'Enter a port';
+
+  @override
+  String get portInvalid => 'Enter a valid port (1–65535)';
+
+  @override
+  String get connectErrorAuth =>
+      'Authentication failed. Check username and password.';
+
+  @override
+  String get connectErrorNetwork =>
+      'Could not reach the server. Check host and port.';
+
+  @override
+  String get connectErrorTimeout => 'Connection timed out. Try again.';
+
+  @override
+  String connectErrorServer(String message) {
+    return 'Server error: $message';
+  }
+
+  @override
+  String get connectErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get connectedServerLabel => 'Connected server';
+
+  @override
+  String get serverHealthLabel => 'Health';
+
+  @override
+  String get serverHealthy => 'Healthy';
+
+  @override
+  String get serverUnhealthy => 'Unhealthy';
+
+  @override
+  String serverVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get serverHealthUnavailable => 'Health information unavailable';
 }

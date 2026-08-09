@@ -183,6 +183,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No servers yet.\nTap Start to begin discovery.'**
   String get noServersYet;
+
+  /// No description provided for @connectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get connectTitle;
+
+  /// No description provided for @openDiscoveryDebug.
+  ///
+  /// In en, this message translates to:
+  /// **'Open mDNS Discovery'**
+  String get openDiscoveryDebug;
+
+  /// No description provided for @hostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get hostLabel;
+
+  /// No description provided for @portLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get portLabel;
+
+  /// No description provided for @usernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username (optional)'**
+  String get usernameLabel;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password (optional)'**
+  String get passwordLabel;
+
+  /// No description provided for @connectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get connectButton;
+
+  /// No description provided for @hostRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a host'**
+  String get hostRequired;
+
+  /// No description provided for @portRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a port'**
+  String get portRequired;
+
+  /// No description provided for @portInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid port (1–65535)'**
+  String get portInvalid;
+
+  /// No description provided for @connectErrorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Check username and password.'**
+  String get connectErrorAuth;
+
+  /// No description provided for @connectErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check host and port.'**
+  String get connectErrorNetwork;
+
+  /// No description provided for @connectErrorTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection timed out. Try again.'**
+  String get connectErrorTimeout;
+
+  /// No description provided for @connectErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error: {message}'**
+  String connectErrorServer(String message);
+
+  /// No description provided for @connectErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get connectErrorGeneric;
+
+  /// No description provided for @homeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// No description provided for @connectedServerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected server'**
+  String get connectedServerLabel;
+
+  /// No description provided for @serverHealthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get serverHealthLabel;
+
+  /// No description provided for @serverHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy'**
+  String get serverHealthy;
+
+  /// No description provided for @serverUnhealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Unhealthy'**
+  String get serverUnhealthy;
+
+  /// No description provided for @serverVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String serverVersion(String version);
+
+  /// No description provided for @serverHealthUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Health information unavailable'**
+  String get serverHealthUnavailable;
 }
 
 class _AppLocalizationsDelegate
