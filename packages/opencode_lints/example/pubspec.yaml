@@ -1,0 +1,20 @@
+name: opencode_lints_example
+description: expect_lint fixtures for opencode_lints.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  custom_lint: ^0.8.1
+  opencode_lints:
+    path: ../
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
