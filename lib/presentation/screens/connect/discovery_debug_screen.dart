@@ -1,31 +1,42 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/constants/app_sizing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/context_extensions.dart';
+import '../../../domain/providers/connection_providers.dart';
 import '../../../services/services.dart';
 import '../../widgets/app_bar/terminal_app_bar.dart';
+import '../../widgets/connection_badge/connection_status.dart';
+import 'connect_error_message.dart';
 
 /// Debug screen for manually exercising [MdnsService].
 ///
 /// Not a production UI: it exists so we can confirm mDNS discovery works
 /// end-to-end against a real `opencode serve --mdns` instance before the
-/// real connect screen lands in a later ticket.
-class DiscoveryDebugScreen extends StatefulWidget {
-  const DiscoveryDebugScreen({super.key});
+/// real connect screen lands in a later ticket. Tapping a discovered
+/// server connects to it (and auto-saves it via the F1.2 flow).
+class DiscoveryDebugScreen extends ConsumerStatefulWidget {
+  const DiscoveryDebugScreen({super.key, this.mdns});
+
+  /// Injectable for tests; defaults to a real [MdnsService].
+  final MdnsService? mdns;
 
   @override
-  State<DiscoveryDebugScreen> createState() => _DiscoveryDebugScreenState();
+  ConsumerState<DiscoveryDebugScreen> createState() =>
+      _DiscoveryDebugScreenState();
 }
 
-class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
-  final MdnsService _mdns = MdnsService();
+class _DiscoveryDebugScreenState extends ConsumerState<DiscoveryDebugScreen> {
+  late final MdnsService _mdns = widget.mdns ?? MdnsService();
   StreamSubscription<List<DiscoveredServer>>? _subscription;
   List<DiscoveredServer> _servers = const [];
   Object? _error;
   bool _isDiscovering = false;
+  String? _connectingKey;
 
   @override
   void dispose() {
@@ -69,6 +80,33 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
       _isDiscovering = false;
       _servers = const [];
     });
+  }
+
+  /// Connects to a discovered server, popping back on success and showing
+  /// the mapped error inline on failure.
+  Future<void> _connect(DiscoveredServer server) async {
+    if (_connectingKey != null) {
+      return;
+    }
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _connectingKey = server.key);
+
+    await ref.read(connectionProvider.notifier).connect(
+      host: server.host,
+      port: server.port,
+    );
+    if (!mounted) return;
+    setState(() => _connectingKey = null);
+
+    final connection = ref.read(connectionProvider);
+    if (connection.status == ConnectionStatus.error) {
+      final message =
+          connectErrorMessage(l10n, connection.error) ?? l10n.connectErrorGeneric;
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -141,8 +179,14 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
                     itemCount: _servers.length,
                     separatorBuilder: (_, _) =>
                         const Divider(height: 1, color: AppColors.border),
-                    itemBuilder: (context, index) =>
-                        _ServerTile(server: _servers[index]),
+                    itemBuilder: (context, index) {
+                      final server = _servers[index];
+                      return _ServerTile(
+                        server: server,
+                        isConnecting: _connectingKey == server.key,
+                        onTap: () => _connect(server),
+                      );
+                    },
                   ),
           ),
         ],
@@ -152,14 +196,22 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
 }
 
 class _ServerTile extends StatelessWidget {
-  const _ServerTile({required this.server});
+  const _ServerTile({
+    required this.server,
+    required this.isConnecting,
+    required this.onTap,
+  });
 
   final DiscoveredServer server;
+  final bool isConnecting;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final attributes = server.attributes;
     return ListTile(
+      enabled: !isConnecting,
+      onTap: onTap,
       title: Text(server.name, style: AppTypography.titleMedium),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,6 +227,17 @@ class _ServerTile extends StatelessWidget {
             ),
         ],
       ),
+      trailing: isConnecting
+          ? const SizedBox(
+              width: AppSizing.iconMedium,
+              height: AppSizing.iconMedium,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(
+              Icons.arrow_forward_ios,
+              size: AppSizing.iconTiny,
+              color: AppColors.textMuted,
+            ),
     );
   }
 }
