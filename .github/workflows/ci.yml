@@ -10,32 +10,151 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Analyze, custom_lint, test
+  changes:
+    name: Detect changes
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      widgetbook: ${{ steps.filter.outputs.widgetbook }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Filter paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'lib/**'
+              - 'test/**'
+              - 'packages/**'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'analysis_options.yaml'
+              - 'l10n.yaml'
+              - 'Makefile'
+              - 'tool/**'
+              - '.github/workflows/ci.yml'
+              - '.flutter-version'
+            widgetbook:
+              - 'widgetbook/**'
+              - 'Makefile'
+              - '.github/workflows/ci.yml'
+              - '.flutter-version'
+
+  # One Flutter install for the whole gate. Parallel jobs would each pay
+  # flutter-action + pub get again and often lose the wall-clock win.
+  check:
+    name: Analyze, custom_lint, test
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
           channel: stable
           cache: true
+          pub-cache: true
 
-      - name: Install dependencies
-        run: make install
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-${{ runner.os }}-${{ hashFiles('**/pubspec.lock', '.flutter-version') }}
+          restore-keys: |
+            build-${{ runner.os }}-
 
-      - name: Generate code
-        run: make generate
+      - name: Install dependencies (CI)
+        run: make install-ci
 
-      - name: Analyze
-        run: flutter analyze --fatal-infos --fatal-warnings
+      - name: Generate code (CI)
+        run: make generate-ci
 
-      - name: Custom lint
-        run: make custom-lint
+      - name: Analyze, custom_lint, test
+        run: make check-ci
 
-      - name: Test
-        run: flutter test
+  widgetbook:
+    name: Widgetbook generate
+    needs: changes
+    if: needs.changes.outputs.widgetbook == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Cache Widgetbook build_runner
+        uses: actions/cache@v4
+        with:
+          path: widgetbook/.dart_tool/build
+          key: build-wb-${{ runner.os }}-${{ hashFiles('widgetbook/pubspec.lock', '.flutter-version') }}
+          restore-keys: |
+            build-wb-${{ runner.os }}-
+
+      - name: Install Widgetbook dependencies
+        run: cd widgetbook && flutter pub get
+
+      - name: Generate Widgetbook
+        run: make widgetbook-generate
+
+      - name: Check Widgetbook registration
+        run: make check-widgetbook-registration
+
+      - name: Analyze Widgetbook
+        run: cd widgetbook && flutter analyze --fatal-infos --fatal-warnings
+
+  gate:
+    name: CI gate
+    needs: [changes, check, widgetbook]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate job results
+        run: |
+          set -euo pipefail
+          code='${{ needs.changes.outputs.code }}'
+          widgetbook='${{ needs.changes.outputs.widgetbook }}'
+
+          if [[ "$code" != 'true' && "$widgetbook" != 'true' ]]; then
+            echo 'Docs-only (or non-code) change — skipping heavy jobs.'
+            exit 0
+          fi
+
+          if [[ "$code" == 'true' ]]; then
+            [[ '${{ needs.check.result }}' == 'success' ]] || {
+              echo 'Check job failed or did not run'
+              exit 1
+            }
+          fi
+
+          if [[ "$widgetbook" == 'true' ]]; then
+            [[ '${{ needs.widgetbook.result }}' == 'success' ]] || {
+              echo 'Widgetbook job failed or did not run'
+              exit 1
+            }
+          fi
+
+          echo 'CI gate passed.'

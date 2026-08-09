@@ -19,6 +19,8 @@ analyzer:
     # Intentionally uses deprecated APIs; analyzed separately by the
     # regression test (see test/unit/core/analyzer_lint_regression_test.dart).
     - 'test/fixtures/**'
+    # Nested package with its own pubspec + analysis_options (CI: widgetbook job).
+    - 'widgetbook/**'
 
 linter:
   rules:

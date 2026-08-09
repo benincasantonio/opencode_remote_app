@@ -442,3 +442,22 @@ Acceptance checklist:
 - [ ] README documents install, env vars, device prerequisites
 
 Testing: flows are executed against the real app; each new flow must be run once against a clean install before merging (smoke + one full scenario).
+
+## E14 - CI performance optimizations (#68)
+
+Goal: speed up the PR gate without weakening it. Depends on the existing CI workflow (E3).
+
+Details:
+1. `make install-ci` / `make generate-ci` — app + `opencode_lints` (+ example) only; skip Widgetbook on the hot path.
+2. Pin Flutter via `.flutter-version` (workflow reads it into `flutter-version:`).
+3. **One** Flutter setup for the main gate (`make check-ci`: analyze → custom_lint → test). Avoid parallel jobs that each re-run `flutter-action` + `pub get`.
+4. Flutter SDK + pub cache via `flutter-action`; `.dart_tool/build` cached separately for build_runner.
+5. Path filters: docs-only PRs skip heavy jobs; Widgetbook codegen runs only when `widgetbook/**` (or related) changes.
+6. Aggregating `CI gate` job so branch protection can require one check.
+
+Acceptance checklist:
+- [ ] `make install-ci` / `make generate-ci` skip Widgetbook
+- [ ] CI pins Flutter from `.flutter-version`
+- [ ] Main gate uses a single Flutter install (`make check-ci`)
+- [ ] Docs-only changes skip heavy jobs; Widgetbook job is path-filtered
+- [ ] Gate still fails on analyze / custom_lint / test failures
