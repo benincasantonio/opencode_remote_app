@@ -82,7 +82,7 @@ void main() {
       expect(find.byType(DiscoveryDebugScreen), findsNothing);
     });
 
-    testWidgets('failed connect stays on the screen with an error snackbar', (
+    testWidgets('tapping pops back to Connect even when the connect fails', (
       tester,
     ) async {
       final failing = _FailingConnection();
@@ -94,12 +94,9 @@ void main() {
       await tester.tap(find.text('office-server'));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Could not reach the server. Check host and port.'),
-        findsOneWidget,
-      );
-      expect(find.byType(DiscoveryDebugScreen), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(failing.lastConnect?.host, '10.0.0.5');
+      expect(find.byType(DiscoveryDebugScreen), findsNothing,
+          reason: 'error surfaces on Connect, not on this screen');
     });
   });
 }
@@ -137,6 +134,8 @@ class _RecordingConnection extends Connection {
 }
 
 class _FailingConnection extends Connection {
+  ({String host, int port})? lastConnect;
+
   @override
   AppConnectionState build() => const AppConnectionState();
 
@@ -147,6 +146,7 @@ class _FailingConnection extends Connection {
     String? username,
     String? password,
   }) async {
+    lastConnect = (host: host, port: port);
     state = AppConnectionState(
       status: ConnectionStatus.error,
       error: const NetworkException('Connection refused'),

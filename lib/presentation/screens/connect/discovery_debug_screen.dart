@@ -10,8 +10,6 @@ import '../../../core/utils/context_extensions.dart';
 import '../../../domain/providers/connection_providers.dart';
 import '../../../services/services.dart';
 import '../../widgets/app_bar/terminal_app_bar.dart';
-import '../../widgets/connection_badge/connection_status.dart';
-import 'connect_error_message.dart';
 
 /// Debug screen for manually exercising [MdnsService].
 ///
@@ -36,7 +34,6 @@ class _DiscoveryDebugScreenState extends ConsumerState<DiscoveryDebugScreen> {
   List<DiscoveredServer> _servers = const [];
   Object? _error;
   bool _isDiscovering = false;
-  String? _connectingKey;
 
   @override
   void dispose() {
@@ -82,31 +79,19 @@ class _DiscoveryDebugScreenState extends ConsumerState<DiscoveryDebugScreen> {
     });
   }
 
-  /// Connects to a discovered server, popping back on success and showing
-  /// the mapped error inline on failure.
-  Future<void> _connect(DiscoveredServer server) async {
-    if (_connectingKey != null) {
-      return;
-    }
-    final l10n = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
-    setState(() => _connectingKey = server.key);
-
-    await ref.read(connectionProvider.notifier).connect(
+  /// Connects to a discovered server.
+  ///
+  /// Pops back to Connect first: the GoRouter redirect that fires on a
+  /// successful connect removes pushed routes, so popping afterwards would
+  /// pop the Home screen itself and leave a black screen. Connect shows the
+  /// connecting state and surfaces any error, so no result handling is
+  /// needed here.
+  void _connect(DiscoveredServer server) {
+    Navigator.of(context).pop();
+    ref.read(connectionProvider.notifier).connect(
       host: server.host,
       port: server.port,
     );
-    if (!mounted) return;
-    setState(() => _connectingKey = null);
-
-    final connection = ref.read(connectionProvider);
-    if (connection.status == ConnectionStatus.error) {
-      final message =
-          connectErrorMessage(l10n, connection.error) ?? l10n.connectErrorGeneric;
-      messenger.showSnackBar(SnackBar(content: Text(message)));
-      return;
-    }
-    Navigator.of(context).pop();
   }
 
   @override
@@ -183,7 +168,6 @@ class _DiscoveryDebugScreenState extends ConsumerState<DiscoveryDebugScreen> {
                       final server = _servers[index];
                       return _ServerTile(
                         server: server,
-                        isConnecting: _connectingKey == server.key,
                         onTap: () => _connect(server),
                       );
                     },
@@ -196,21 +180,15 @@ class _DiscoveryDebugScreenState extends ConsumerState<DiscoveryDebugScreen> {
 }
 
 class _ServerTile extends StatelessWidget {
-  const _ServerTile({
-    required this.server,
-    required this.isConnecting,
-    required this.onTap,
-  });
+  const _ServerTile({required this.server, required this.onTap});
 
   final DiscoveredServer server;
-  final bool isConnecting;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final attributes = server.attributes;
     return ListTile(
-      enabled: !isConnecting,
       onTap: onTap,
       title: Text(server.name, style: AppTypography.titleMedium),
       subtitle: Column(
@@ -227,17 +205,11 @@ class _ServerTile extends StatelessWidget {
             ),
         ],
       ),
-      trailing: isConnecting
-          ? const SizedBox(
-              width: AppSizing.iconMedium,
-              height: AppSizing.iconMedium,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const Icon(
-              Icons.arrow_forward_ios,
-              size: AppSizing.iconTiny,
-              color: AppColors.textMuted,
-            ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: AppSizing.iconTiny,
+        color: AppColors.textMuted,
+      ),
     );
   }
 }
