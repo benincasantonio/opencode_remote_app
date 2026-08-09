@@ -3,6 +3,10 @@
 generate:
 	@echo "Generating files with build_runner..."
 	dart run build_runner build --delete-conflicting-outputs
+	@echo "Generating widgetbook files..."
+	cd widgetbook && dart run build_runner build --delete-conflicting-outputs
+	@echo "Generating l10n files..."
+	flutter gen-l10n
 
 widgetbook-generate:
 	@echo "Generating widgetbook files..."
@@ -75,7 +79,7 @@ help:
 	@echo "Available targets:"
 	@echo ""
 	@echo "Code Generation:"
-	@echo "  make generate         - Generate files with build_runner"
+	@echo "  make generate         - Regenerate all code (build_runner + widgetbook + gen-l10n)"
 	@echo "  make widgetbook-generate - Generate widgetbook files"
 	@echo "  make generate-clean    - Clean generated files"
 	@echo ""
