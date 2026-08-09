@@ -333,7 +333,7 @@ dev_dependencies:
 - Private members: prefix with _
 - Models: Use freezed + json_serializable for all API models
 - Local storage: shared_preferences for lightweight flags, flutter_secure_storage for credentials
-- Providers: Use @riverpod annotation for all providers; generate with dart run build_runner build
+- Providers: Use @riverpod annotation for all providers; generate with `make generate`
 - Error handling: All Dio calls wrapped in try/catch, map to AppException subtypes
 - Null safety: Strict null safety, avoid ! operator
 - Imports: Prefer relative imports within lib/, absolute for packages
@@ -371,14 +371,16 @@ dev_dependencies:
 ### Widgetbook Workflow
 - **Use cases**: Create `widgetbook/lib/{widget}_use_case.dart` for each widget
 - **Knob types**: `context.knobs.object.dropdown<T>()` (not deprecated `list`), `context.knobs.stringOrNull()`, `context.knobs.boolean()`
-- **Regeneration**: `cd widgetbook && dart run build_runner build --delete-conflicting-outputs` after adding use cases
+- **Regeneration**: `make generate` after adding use cases (runs widgetbook build_runner)
 - **Pattern**: Regenerates `main.directories.g.dart` to register new use cases
+- **Verification**: `make check-widgetbook-registration` verifies every use case is registered
 
 ### Codegen Pattern
 - **Freezed + JSON**: `freezed_annotation` + `json_annotation` packages
 - **Riverpod**: `@riverpod` annotation with codegen
-- **Generation**: `dart run build_runner build --delete-conflicting-outputs`
-- **File location**: Generated files (`.g.dart`) are created in same directory as source files
+- **Generation**: `make generate` (build_runner + widgetbook + `flutter gen-l10n` in one step)
+- **Generated files are never committed**: `*.g.dart`, `*.freezed.dart`, and generated l10n files (`lib/l10n/app_localizations*.dart`) are gitignored; always run `make generate` before `make analyze`/`make test` — missing generated files fail analysis
+- **File location**: Generated files (`.g.dart`, `.freezed.dart`) are created in same directory as source files
 - **Usage**: Providers use generated classes, models use `.fromJson`/`.toJson()`
 
 ### Custom Lint (`packages/opencode_lints`)
@@ -392,7 +394,7 @@ dev_dependencies:
 ```bash
 # Flutter app
 flutter pub get
-make generate
+make generate   # build_runner + widgetbook + gen-l10n (always run before analyze/test)
 make custom-lint
 flutter run
 

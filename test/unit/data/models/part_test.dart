@@ -5,11 +5,11 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:opencode_remote_app/data/models/models.dart';
 
 Map<String, dynamic> basePart(String type) => {
-      'id': 'prt_1',
-      'sessionID': 'ses_1',
-      'messageID': 'msg_1',
-      'type': type,
-    };
+  'id': 'prt_1',
+  'sessionID': 'ses_1',
+  'messageID': 'msg_1',
+  'type': type,
+};
 
 void main() {
   group('MessagePart', () {
@@ -102,7 +102,13 @@ void main() {
     test('round-trips every typed variant through toJson', () {
       final parts = <MessagePart>[
         MessagePart.text(id: 'a', sessionID: 's', messageID: 'm', text: 'hi'),
-        MessagePart.reasoning(id: 'a', sessionID: 's', messageID: 'm', text: 'r', time: const PartTime(start: 1)),
+        MessagePart.reasoning(
+          id: 'a',
+          sessionID: 's',
+          messageID: 'm',
+          text: 'r',
+          time: const PartTime(start: 1),
+        ),
         MessagePart.tool(
           id: 'a',
           sessionID: 's',
@@ -118,16 +124,30 @@ void main() {
           messageID: 'm',
           reason: 'done',
           cost: 1,
-          tokens: const Tokens(input: 1, output: 1, reasoning: 1, cache: CacheTokens(read: 1, write: 1)),
+          tokens: const Tokens(
+            input: 1,
+            output: 1,
+            reasoning: 1,
+            cache: CacheTokens(read: 1, write: 1),
+          ),
         ),
-        MessagePart.other(id: 'a', sessionID: 's', messageID: 'm', type: 'mystery'),
+        MessagePart.other(
+          id: 'a',
+          sessionID: 's',
+          messageID: 'm',
+          type: 'mystery',
+        ),
       ];
 
       for (final part in parts) {
         final roundTrip = MessagePart.fromJson(
           jsonDecode(jsonEncode(part.toJson())) as Map<String, dynamic>,
         );
-        expect(roundTrip, part, reason: 'round-trip failed for ${part.runtimeType}');
+        expect(
+          roundTrip,
+          part,
+          reason: 'round-trip failed for ${part.runtimeType}',
+        );
       }
     });
   });
@@ -181,7 +201,11 @@ void main() {
 
     test('throws on unknown status', () {
       expect(
-        () => ToolState.fromJson({'status': 'unknown', 'input': <String, dynamic>{}, 'time': {'start': 1}}),
+        () => ToolState.fromJson({
+          'status': 'unknown',
+          'input': <String, dynamic>{},
+          'time': {'start': 1},
+        }),
         throwsA(isA<CheckedFromJsonException>()),
       );
     });

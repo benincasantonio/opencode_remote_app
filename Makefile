@@ -1,4 +1,4 @@
-.PHONY: generate generate-ci generate-clean android android-debug android-release android-appbundle ios clean install install-ci format analyze custom-lint test test-quick test-unit test-widget check-ci widgetbook-generate help
+.PHONY: generate generate-ci generate-clean android android-debug android-release android-appbundle ios clean install install-ci format analyze custom-lint test test-quick test-unit test-widget check-ci widgetbook-generate check-widgetbook-registration help
 
 generate:
 	@echo "Generating files with build_runner..."
@@ -19,11 +19,17 @@ widgetbook-generate:
 	@echo "Generating widgetbook files..."
 	cd widgetbook && dart run build_runner build --delete-conflicting-outputs
 
+check-widgetbook-registration:
+	@echo "Checking widgetbook use case registration..."
+	dart run tool/check_widgetbook_registration.dart
+
 generate-clean:
 	@echo "Cleaning generated files..."
 	rm -rf .dart_tool/build
 	find lib -name "*.g.dart" -type f -delete
+	find lib -name "*.freezed.dart" -type f -delete
 	find widgetbook/lib -name "*.g.dart" -type f -delete
+	find lib/l10n -name "app_localizations*.dart" -type f -delete
 
 android: android-debug
 
@@ -49,7 +55,9 @@ clean:
 	@echo "Cleaning generated files..."
 	rm -rf .dart_tool/build
 	find lib -name "*.g.dart" -type f -delete
+	find lib -name "*.freezed.dart" -type f -delete
 	find widgetbook/lib -name "*.g.dart" -type f -delete
+	find lib/l10n -name "app_localizations*.dart" -type f -delete
 
 install:
 	@echo "Installing dependencies..."
@@ -105,6 +113,7 @@ help:
 	@echo "  make generate         - Regenerate all code (build_runner + widgetbook + gen-l10n)"
 	@echo "  make generate-ci      - CI codegen only (app build_runner + gen-l10n)"
 	@echo "  make widgetbook-generate - Generate widgetbook files"
+	@echo "  make check-widgetbook-registration - Verify every use case is registered"
 	@echo "  make generate-clean    - Clean generated files"
 	@echo ""
 	@echo "Build Targets:"

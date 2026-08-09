@@ -8,31 +8,28 @@ part 'message.g.dart';
 
 @freezed
 sealed class UserTime with _$UserTime {
-  const factory UserTime({
-    required int created,
-  }) = _UserTime;
+  const factory UserTime({required int created}) = _UserTime;
 
-  factory UserTime.fromJson(Map<String, dynamic> json) => _$UserTimeFromJson(json);
+  factory UserTime.fromJson(Map<String, dynamic> json) =>
+      _$UserTimeFromJson(json);
 }
 
 @freezed
 sealed class AssistantTime with _$AssistantTime {
-  const factory AssistantTime({
-    required int created,
-    int? completed,
-  }) = _AssistantTime;
+  const factory AssistantTime({required int created, int? completed}) =
+      _AssistantTime;
 
-  factory AssistantTime.fromJson(Map<String, dynamic> json) => _$AssistantTimeFromJson(json);
+  factory AssistantTime.fromJson(Map<String, dynamic> json) =>
+      _$AssistantTimeFromJson(json);
 }
 
 @freezed
 sealed class MessagePath with _$MessagePath {
-  const factory MessagePath({
-    required String cwd,
-    required String root,
-  }) = _MessagePath;
+  const factory MessagePath({required String cwd, required String root}) =
+      _MessagePath;
 
-  factory MessagePath.fromJson(Map<String, dynamic> json) => _$MessagePathFromJson(json);
+  factory MessagePath.fromJson(Map<String, dynamic> json) =>
+      _$MessagePathFromJson(json);
 }
 
 @freezed
@@ -56,7 +53,8 @@ sealed class MessageError with _$MessageError {
     Map<String, dynamic>? data,
   }) = _MessageError;
 
-  factory MessageError.fromJson(Map<String, dynamic> json) => _$MessageErrorFromJson(json);
+  factory MessageError.fromJson(Map<String, dynamic> json) =>
+      _$MessageErrorFromJson(json);
 
   @JsonKey(includeToJson: false)
   String get message => (data?['message'] as String?) ?? '';
@@ -108,7 +106,8 @@ sealed class Message with _$Message {
     dynamic structured,
   }) = AssistantMessage;
 
-  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
+  factory Message.fromJson(Map<String, dynamic> json) =>
+      _$MessageFromJson(json);
 }
 
 @freezed
