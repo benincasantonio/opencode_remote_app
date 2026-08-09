@@ -1,10 +1,17 @@
-.PHONY: generate generate-clean android android-debug android-release android-appbundle ios clean install format analyze custom-lint test test-quick test-unit test-widget widgetbook-generate help
+.PHONY: generate generate-ci generate-clean android android-debug android-release android-appbundle ios clean install install-ci format analyze custom-lint test test-quick test-unit test-widget widgetbook-generate help
 
 generate:
 	@echo "Generating files with build_runner..."
 	dart run build_runner build --delete-conflicting-outputs
 	@echo "Generating widgetbook files..."
 	cd widgetbook && dart run build_runner build --delete-conflicting-outputs
+	@echo "Generating l10n files..."
+	flutter gen-l10n
+
+# CI hot path: app codegen only (no Widgetbook).
+generate-ci:
+	@echo "Generating files with build_runner (CI)..."
+	dart run build_runner build --delete-conflicting-outputs
 	@echo "Generating l10n files..."
 	flutter gen-l10n
 
@@ -51,6 +58,13 @@ install:
 	cd packages/opencode_lints && dart pub get
 	cd packages/opencode_lints/example && flutter pub get
 
+# CI hot path: packages needed for analyze / custom_lint / test (no Widgetbook).
+install-ci:
+	@echo "Installing CI dependencies..."
+	flutter pub get
+	cd packages/opencode_lints && dart pub get
+	cd packages/opencode_lints/example && flutter pub get
+
 format:
 	@echo "Formatting Dart files..."
 	dart format .
@@ -80,6 +94,7 @@ help:
 	@echo ""
 	@echo "Code Generation:"
 	@echo "  make generate         - Regenerate all code (build_runner + widgetbook + gen-l10n)"
+	@echo "  make generate-ci      - CI codegen only (app build_runner + gen-l10n)"
 	@echo "  make widgetbook-generate - Generate widgetbook files"
 	@echo "  make generate-clean    - Clean generated files"
 	@echo ""
@@ -91,7 +106,8 @@ help:
 	@echo "  make ios              - Build iOS app"
 	@echo ""
 	@echo "Development:"
-	@echo "  make install           - Install dependencies"
+	@echo "  make install           - Install all dependencies (app + widgetbook + lints)"
+	@echo "  make install-ci        - CI install only (app + opencode_lints + example)"
 	@echo "  make format            - Format Dart files"
 	@echo "  make analyze           - Analyze Dart files"
 	@echo "  make custom-lint       - Run custom_lint (opencode_lints + riverpod/leancode)"

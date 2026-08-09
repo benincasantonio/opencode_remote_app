@@ -10,32 +10,260 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Analyze, custom_lint, test
+  changes:
+    name: Detect changes
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      widgetbook: ${{ steps.filter.outputs.widgetbook }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Filter paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'lib/**'
+              - 'test/**'
+              - 'packages/**'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'analysis_options.yaml'
+              - 'l10n.yaml'
+              - 'Makefile'
+              - 'tool/**'
+              - '.github/workflows/ci.yml'
+              - '.flutter-version'
+            widgetbook:
+              - 'widgetbook/**'
+              - 'Makefile'
+              - '.github/workflows/ci.yml'
+              - '.flutter-version'
+
+  setup:
+    name: Install & generate
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
           channel: stable
           cache: true
+          pub-cache: true
 
-      - name: Install dependencies
-        run: make install
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-${{ runner.os }}-${{ hashFiles('**/pubspec.lock', '.flutter-version') }}
+          restore-keys: |
+            build-${{ runner.os }}-
 
-      - name: Generate code
-        run: make generate
+      - name: Install dependencies (CI)
+        run: make install-ci
+
+      - name: Generate code (CI)
+        run: make generate-ci
+
+      - name: Upload generated sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-sources
+          retention-days: 1
+          path: |
+            **/*.g.dart
+            **/*.freezed.dart
+            lib/l10n/app_localizations*.dart
+
+  analyze:
+    name: Analyze
+    needs: [changes, setup]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies (CI)
+        run: make install-ci
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+          path: .
 
       - name: Analyze
         run: flutter analyze --fatal-infos --fatal-warnings
 
+  custom_lint:
+    name: Custom lint
+    needs: [changes, setup]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies (CI)
+        run: make install-ci
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+          path: .
+
       - name: Custom lint
         run: make custom-lint
 
+  test:
+    name: Test
+    needs: [changes, setup]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Install dependencies (CI)
+        run: make install-ci
+
+      - name: Download generated sources
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-sources
+          path: .
+
       - name: Test
         run: flutter test
+
+  widgetbook:
+    name: Widgetbook generate
+    needs: changes
+    if: needs.changes.outputs.widgetbook == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter-version
+        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Cache Widgetbook build_runner
+        uses: actions/cache@v4
+        with:
+          path: widgetbook/.dart_tool/build
+          key: build-wb-${{ runner.os }}-${{ hashFiles('widgetbook/pubspec.lock', '.flutter-version') }}
+          restore-keys: |
+            build-wb-${{ runner.os }}-
+
+      - name: Install Widgetbook dependencies
+        run: cd widgetbook && flutter pub get
+
+      - name: Generate Widgetbook
+        run: make widgetbook-generate
+
+  gate:
+    name: CI gate
+    needs: [changes, analyze, custom_lint, test, widgetbook]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate job results
+        run: |
+          set -euo pipefail
+          code='${{ needs.changes.outputs.code }}'
+          widgetbook='${{ needs.changes.outputs.widgetbook }}'
+
+          if [[ "$code" != 'true' && "$widgetbook" != 'true' ]]; then
+            echo 'Docs-only (or non-code) change — skipping heavy jobs.'
+            exit 0
+          fi
+
+          if [[ "$code" == 'true' ]]; then
+            [[ '${{ needs.analyze.result }}' == 'success' ]] || {
+              echo 'Analyze failed or did not run'
+              exit 1
+            }
+            [[ '${{ needs.custom_lint.result }}' == 'success' ]] || {
+              echo 'Custom lint failed or did not run'
+              exit 1
+            }
+            [[ '${{ needs.test.result }}' == 'success' ]] || {
+              echo 'Test failed or did not run'
+              exit 1
+            }
+          fi
+
+          if [[ "$widgetbook" == 'true' ]]; then
+            [[ '${{ needs.widgetbook.result }}' == 'success' ]] || {
+              echo 'Widgetbook job failed or did not run'
+              exit 1
+            }
+          fi
+
+          echo 'CI gate passed.'
