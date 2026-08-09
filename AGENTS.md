@@ -383,9 +383,8 @@ dev_dependencies:
 
 ### Custom Lint (`packages/opencode_lints`)
 - **Plugin**: `opencode_lints` (via `custom_lint`) enforces project conventions the built-in linter cannot
-- **Rules**: `file_size_signal` (warning at >400 lines), `avoid_raw_string_in_widgets`, `avoid_widget_returning_methods`, `models_are_dtos`
+- **Rules**: `file_size_signal` (warning at >400 lines — signal, not a reason to split blindly), `avoid_raw_string_in_widgets`, `avoid_widget_returning_methods`, `models_are_dtos`
 - **Run**: `make custom-lint` (or `dart run custom_lint`) from the repo root
-- **Suppressing file_size_signal**: reason is mandatory and must be comma-separated — `// ignore_for_file: file_size_signal, <reason>`. A bare ignore reports `file_size_signal_missing_reason`
 - **Fixtures**: `packages/opencode_lints/example/` holds `// expect_lint` tests for every rule
 
 ## Build & Run Commands

@@ -11,7 +11,6 @@ class _OpencodeLints extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) => [
     FileSizeSignal.fromConfigs(configs),
-    FileSizeSignalMissingReason.fromConfigs(configs),
     AvoidRawStringInWidgets.fromConfigs(configs),
     const AvoidWidgetReturningMethods(),
     const ModelsAreDtos(),
