@@ -1,4 +1,4 @@
-.PHONY: generate generate-ci generate-clean android android-debug android-release android-appbundle ios clean install install-ci format analyze custom-lint test test-quick test-unit test-widget widgetbook-generate help
+.PHONY: generate generate-ci generate-clean android android-debug android-release android-appbundle ios clean install install-ci format analyze custom-lint test test-quick test-unit test-widget check-ci widgetbook-generate help
 
 generate:
 	@echo "Generating files with build_runner..."
@@ -77,6 +77,15 @@ custom-lint:
 	@echo "Running custom_lint..."
 	dart run custom_lint
 
+# Single-runner CI gate: analyze → custom_lint → test (one Flutter install).
+check-ci:
+	@echo "Analyzing..."
+	flutter analyze --fatal-infos --fatal-warnings
+	@echo "Running custom_lint..."
+	dart run custom_lint
+	@echo "Running tests..."
+	flutter test
+
 test:
 	@echo "Running all tests..."
 	flutter test
@@ -111,6 +120,7 @@ help:
 	@echo "  make format            - Format Dart files"
 	@echo "  make analyze           - Analyze Dart files"
 	@echo "  make custom-lint       - Run custom_lint (opencode_lints + riverpod/leancode)"
+	@echo "  make check-ci          - CI gate locally (analyze + custom_lint + test)"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test             - Run all tests"

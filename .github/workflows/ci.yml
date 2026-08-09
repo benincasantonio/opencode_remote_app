@@ -43,12 +43,14 @@ jobs:
               - '.github/workflows/ci.yml'
               - '.flutter-version'
 
-  setup:
-    name: Install & generate
+  # One Flutter install for the whole gate. Parallel jobs would each pay
+  # flutter-action + pub get again and often lose the wall-clock win.
+  check:
+    name: Analyze, custom_lint, test
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -79,117 +81,8 @@ jobs:
       - name: Generate code (CI)
         run: make generate-ci
 
-      - name: Upload generated sources
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-sources
-          retention-days: 1
-          path: |
-            **/*.g.dart
-            **/*.freezed.dart
-            lib/l10n/app_localizations*.dart
-
-  analyze:
-    name: Analyze
-    needs: [changes, setup]
-    if: needs.changes.outputs.code == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Read Flutter version
-        id: flutter-version
-        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
-          pub-cache: true
-
-      - name: Install dependencies (CI)
-        run: make install-ci
-
-      - name: Download generated sources
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-sources
-          path: .
-
-      - name: Analyze
-        run: flutter analyze --fatal-infos --fatal-warnings
-
-  custom_lint:
-    name: Custom lint
-    needs: [changes, setup]
-    if: needs.changes.outputs.code == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Read Flutter version
-        id: flutter-version
-        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
-          pub-cache: true
-
-      - name: Install dependencies (CI)
-        run: make install-ci
-
-      - name: Download generated sources
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-sources
-          path: .
-
-      - name: Custom lint
-        run: make custom-lint
-
-  test:
-    name: Test
-    needs: [changes, setup]
-    if: needs.changes.outputs.code == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Read Flutter version
-        id: flutter-version
-        run: echo "version=$(tr -d '[:space:]' < .flutter-version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.flutter-version.outputs.version }}
-          channel: stable
-          cache: true
-          pub-cache: true
-
-      - name: Install dependencies (CI)
-        run: make install-ci
-
-      - name: Download generated sources
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-sources
-          path: .
-
-      - name: Test
-        run: flutter test
+      - name: Analyze, custom_lint, test
+        run: make check-ci
 
   widgetbook:
     name: Widgetbook generate
@@ -229,7 +122,7 @@ jobs:
 
   gate:
     name: CI gate
-    needs: [changes, analyze, custom_lint, test, widgetbook]
+    needs: [changes, check, widgetbook]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -245,16 +138,8 @@ jobs:
           fi
 
           if [[ "$code" == 'true' ]]; then
-            [[ '${{ needs.analyze.result }}' == 'success' ]] || {
-              echo 'Analyze failed or did not run'
-              exit 1
-            }
-            [[ '${{ needs.custom_lint.result }}' == 'success' ]] || {
-              echo 'Custom lint failed or did not run'
-              exit 1
-            }
-            [[ '${{ needs.test.result }}' == 'success' ]] || {
-              echo 'Test failed or did not run'
+            [[ '${{ needs.check.result }}' == 'success' ]] || {
+              echo 'Check job failed or did not run'
               exit 1
             }
           fi
