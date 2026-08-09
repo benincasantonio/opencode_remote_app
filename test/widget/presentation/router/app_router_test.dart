@@ -4,8 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:opencode_remote_app/app.dart';
 import 'package:opencode_remote_app/domain/providers/connection_providers.dart';
 import 'package:opencode_remote_app/presentation/router/app_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
   testWidgets('App boots at /connect', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: App()));
     await tester.pumpAndSettle();
