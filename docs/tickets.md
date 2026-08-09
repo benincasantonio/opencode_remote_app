@@ -66,22 +66,25 @@ The original phase-based tickets were restructured into features. Mapping so not
 Goal: The shared infrastructure every feature depends on — a configured Dio client and the routing/app shell.
 Details:
 1. Create lib/services/dio_client.dart: Dio instance accepting baseUrl + optional credentials; timeouts; interceptors for logging, auth (Basic), and error mapping to AppException (map 401/403 to AuthException).
-2. Create lib/app.dart + lib/presentation/router/app_router.dart: GoRouter with splash + connect routes only; redirect logic based on connection state (routes for later features are added by their own tickets).
-3. Update lib/main.dart: ProviderScope wiring, minimal initialization.
-Acceptance: DioClient creates a functional configured instance. App boots through the router. Analyzer + tests pass.
-Testing: Unit tests for DioClient (baseUrl, timeouts, interceptor behavior with mocked Dio adapter).
+2. Create lib/app.dart + lib/presentation/router/app_router.dart: GoRouter with `/connect` only (initial location); redirect disconnected traffic to `/connect`. No `/splash` in F0 — decorative splash was deferred; F1 owns auto-connect / boot loading UI.
+3. Update lib/main.dart: ProviderScope wiring, WidgetsFlutterBinding.ensureInitialized, no Firebase.
+Acceptance: DioClient creates a functional configured instance. App boots through the router at `/connect`. Analyzer + tests pass.
+Testing: Unit tests for DioClient (baseUrl, timeouts, interceptor behavior with mocked Dio adapter). Router smoke tests for initial route + redirect.
 
 ## F1 - Connect & Dashboard
 
-Goal: Connect to an OpenCode server (manual entry + mDNS discovery), persist saved servers, and show server health. **Models created here: ServerHealth, SavedServer (+ credentials).**
-Details:
-1. Models: ServerHealth {healthy, version} for GET /global/health; SavedServer + credentials (local, not API) for persistence.
-2. Datasource: local storage (shared_preferences for saved servers, flutter_secure_storage for credentials; CRUD).
-3. Repository: ServerRepository — connect, disconnect, health check, saved server list, delete, discovery stream.
-4. Providers: connection state notifier (connect/disconnect), server health polling, saved servers, mDNS discovery.
-5. UI: SplashScreen (auto-connect saved server), ConnectScreen (manual + discovered server list), HomeScreen with ServerStatusWidget (server name, version, health badge, disconnect).
-Acceptance: User can connect via manual entry or discovered server, persists across launches, and sees live health status on Home. Analyzer + tests pass.
-Testing: Unit tests for storage + repository with mocks; widget tests for Connect/Home screens with provider overrides.
+GitHub epic: [#51](https://github.com/benincasantonio/opencode_remote_app/issues/51). Split into **user-value** subtickets (not layer tickets). Models (`ServerHealth`, `SavedServer` + credentials) are created inside the subticket that needs them.
+
+| Sub | User value | Issue |
+|---|---|---|
+| **F1.1** Manual connect | Type host:port (+ auth) → connect → Home with one-shot health/version | [#70](https://github.com/benincasantonio/opencode_remote_app/issues/70) |
+| **F1.2** Remember & reconnect | Saved servers/credentials + boot auto-connect | [#71](https://github.com/benincasantonio/opencode_remote_app/issues/71) |
+| **F1.3** Discover on LAN | Tap a discovered OpenCode server to connect | [#72](https://github.com/benincasantonio/opencode_remote_app/issues/72) |
+| **F1.4** Live health dashboard | Polling health, ServerStatusWidget, disconnect | [#73](https://github.com/benincasantonio/opencode_remote_app/issues/73) |
+
+Order: F1.1 → F1.2 → F1.3 → F1.4 (F1.3 may follow F1.1; prefer F1.2 first so discoveries can be saved).
+Epic acceptance: all four subtickets done; Connect → Home flow works end-to-end; analyzer + tests pass.
+Depends on F0 (#49). Settings CRUD for saved servers is F5; mDNS service already exists (#40).
 
 ## F2 - Sessions
 
