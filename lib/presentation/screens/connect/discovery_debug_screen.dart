@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/constants/app_sizing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/context_extensions.dart';
+import '../../../domain/providers/connection_providers.dart';
 import '../../../services/services.dart';
 import '../../widgets/app_bar/terminal_app_bar.dart';
 
@@ -12,16 +15,21 @@ import '../../widgets/app_bar/terminal_app_bar.dart';
 ///
 /// Not a production UI: it exists so we can confirm mDNS discovery works
 /// end-to-end against a real `opencode serve --mdns` instance before the
-/// real connect screen lands in a later ticket.
-class DiscoveryDebugScreen extends StatefulWidget {
-  const DiscoveryDebugScreen({super.key});
+/// real connect screen lands in a later ticket. Tapping a discovered
+/// server connects to it (and auto-saves it via the F1.2 flow).
+class DiscoveryDebugScreen extends ConsumerStatefulWidget {
+  const DiscoveryDebugScreen({super.key, this.mdns});
+
+  /// Injectable for tests; defaults to a real [MdnsService].
+  final MdnsService? mdns;
 
   @override
-  State<DiscoveryDebugScreen> createState() => _DiscoveryDebugScreenState();
+  ConsumerState<DiscoveryDebugScreen> createState() =>
+      _DiscoveryDebugScreenState();
 }
 
-class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
-  final MdnsService _mdns = MdnsService();
+class _DiscoveryDebugScreenState extends ConsumerState<DiscoveryDebugScreen> {
+  late final MdnsService _mdns = widget.mdns ?? MdnsService();
   StreamSubscription<List<DiscoveredServer>>? _subscription;
   List<DiscoveredServer> _servers = const [];
   Object? _error;
@@ -69,6 +77,21 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
       _isDiscovering = false;
       _servers = const [];
     });
+  }
+
+  /// Connects to a discovered server.
+  ///
+  /// Pops back to Connect first: the GoRouter redirect that fires on a
+  /// successful connect removes pushed routes, so popping afterwards would
+  /// pop the Home screen itself and leave a black screen. Connect shows the
+  /// connecting state and surfaces any error, so no result handling is
+  /// needed here.
+  void _connect(DiscoveredServer server) {
+    Navigator.of(context).pop();
+    ref.read(connectionProvider.notifier).connect(
+      host: server.host,
+      port: server.port,
+    );
   }
 
   @override
@@ -141,8 +164,13 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
                     itemCount: _servers.length,
                     separatorBuilder: (_, _) =>
                         const Divider(height: 1, color: AppColors.border),
-                    itemBuilder: (context, index) =>
-                        _ServerTile(server: _servers[index]),
+                    itemBuilder: (context, index) {
+                      final server = _servers[index];
+                      return _ServerTile(
+                        server: server,
+                        onTap: () => _connect(server),
+                      );
+                    },
                   ),
           ),
         ],
@@ -152,14 +180,16 @@ class _DiscoveryDebugScreenState extends State<DiscoveryDebugScreen> {
 }
 
 class _ServerTile extends StatelessWidget {
-  const _ServerTile({required this.server});
+  const _ServerTile({required this.server, required this.onTap});
 
   final DiscoveredServer server;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final attributes = server.attributes;
     return ListTile(
+      onTap: onTap,
       title: Text(server.name, style: AppTypography.titleMedium),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,6 +204,11 @@ class _ServerTile extends StatelessWidget {
               ),
             ),
         ],
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: AppSizing.iconTiny,
+        color: AppColors.textMuted,
       ),
     );
   }
