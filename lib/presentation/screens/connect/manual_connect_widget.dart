@@ -8,7 +8,6 @@ import '../../../core/utils/context_extensions.dart';
 import '../../../domain/providers/connection_providers.dart';
 import '../../widgets/app_button/app_button.dart';
 import '../../widgets/connection_badge/connection_status.dart';
-import 'connect_error_message.dart';
 
 /// Manual host/port (+ optional Basic auth) form for connecting to OpenCode.
 class ManualConnectWidget extends ConsumerStatefulWidget {
@@ -53,12 +52,14 @@ class _ManualConnectWidgetState extends ConsumerState<ManualConnectWidget> {
     }
 
     final port = int.parse(_portController.text.trim());
-    await ref.read(connectionProvider.notifier).connect(
-      host: _hostController.text,
-      port: port,
-      username: _optional(_usernameController.text),
-      password: _optional(_passwordController.text),
-    );
+    await ref
+        .read(connectionProvider.notifier)
+        .connect(
+          host: _hostController.text,
+          port: port,
+          username: _optional(_usernameController.text),
+          password: _optional(_passwordController.text),
+        );
   }
 
   static String? _optional(String value) {
@@ -71,7 +72,6 @@ class _ManualConnectWidgetState extends ConsumerState<ManualConnectWidget> {
     final l10n = context.l10n;
     final connection = ref.watch(connectionProvider);
     final isConnecting = connection.status == ConnectionStatus.connecting;
-    final errorText = connectErrorMessage(l10n, connection.error);
 
     return Form(
       key: _formKey,
@@ -129,15 +129,6 @@ class _ManualConnectWidgetState extends ConsumerState<ManualConnectWidget> {
             },
             decoration: InputDecoration(labelText: l10n.passwordLabel),
           ),
-          if (errorText != null) ...[
-            const SizedBox(height: AppSizing.gapMedium),
-            Text(
-              errorText,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-          ],
           const SizedBox(height: AppSizing.gapXLarge),
           AppButton(
             label: l10n.connectButton,

@@ -132,6 +132,15 @@ class MdnsService {
     }
   }
 
+  /// Whether the advertised service name identifies an OpenCode instance
+  /// (`opencode-<port>`); filters out unrelated `_http._tcp` services such as
+  /// printers and arbitrary web servers without probing them.
+  bool _isOpencodeService(BonsoirService service) {
+    return service.name.toLowerCase().startsWith(
+      AppConstants.mdnsServiceNamePrefix,
+    );
+  }
+
   void _handleEvent(BonsoirDiscoveryEvent event) {
     switch (event) {
       case BonsoirDiscoveryStartedEvent():
@@ -141,6 +150,9 @@ class MdnsService {
           'mDNS service found',
           context: {'name': service.name, 'port': service.port},
         );
+        if (!_isOpencodeService(service)) {
+          return;
+        }
         _resolveIfPossible(service);
       case BonsoirDiscoveryServiceResolvedEvent(:final service):
         _upsert(service);
@@ -175,6 +187,9 @@ class MdnsService {
   }
 
   void _upsert(BonsoirService service) {
+    if (!_isOpencodeService(service)) {
+      return;
+    }
     final host = service.host;
     if (host == null) {
       return;

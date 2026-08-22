@@ -16,9 +16,9 @@ class AppErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (compact) {
-      return AppErrorCompactMode(message: message, onRetry: onRetry);
-    }
-    return AppErrorFullMode(message: message, onRetry: onRetry);
+    final error = compact
+        ? AppErrorCompactMode(message: message, onRetry: onRetry)
+        : AppErrorFullMode(message: message, onRetry: onRetry);
+    return Semantics(liveRegion: true, child: error);
   }
 }
