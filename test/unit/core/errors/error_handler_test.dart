@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:opencode_remote_app/core/errors/error_handler.dart';
 import 'package:opencode_remote_app/core/errors/errors.dart';
 
 void main() {

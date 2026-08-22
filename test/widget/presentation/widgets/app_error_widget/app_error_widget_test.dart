@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:opencode_remote_app/core/constants/app_sizing.dart';
 import 'package:opencode_remote_app/core/theme/app_colors.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_button/app_button.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_error_widget/app_error_widget.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:opencode_remote_app/core/theme/app_colors.dart';
 import 'package:opencode_remote_app/presentation/widgets/code_block/code_block.dart';
 import 'package:opencode_remote_app/presentation/widgets/markdown_renderer/markdown_renderer.dart';
 
