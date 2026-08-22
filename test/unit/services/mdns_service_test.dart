@@ -10,32 +10,51 @@ void main() {
   group('DiscoveredServer', () {
     test('equality is based on name, host and port (attributes ignored)', () {
       const a = DiscoveredServer(
-        name: 'svc',
+        name: 'opencode-4096',
         host: '10.0.0.1',
         port: 4096,
         attributes: {'v': '1'},
       );
       const b = DiscoveredServer(
-        name: 'svc',
+        name: 'opencode-4096',
         host: '10.0.0.1',
         port: 4096,
         attributes: {'v': '2'},
       );
-      const c = DiscoveredServer(name: 'svc', host: '10.0.0.2', port: 4096);
+      const c = DiscoveredServer(
+        name: 'opencode-4096',
+        host: '10.0.0.2',
+        port: 4096,
+      );
 
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
 
     test('hashCode is consistent with equality', () {
-      const a = DiscoveredServer(name: 'svc', host: '10.0.0.1', port: 4096);
-      const b = DiscoveredServer(name: 'svc', host: '10.0.0.1', port: 4096);
+      const a = DiscoveredServer(
+        name: 'opencode-4096',
+        host: '10.0.0.1',
+        port: 4096,
+      );
+      const b = DiscoveredServer(
+        name: 'opencode-4096',
+        host: '10.0.0.1',
+        port: 4096,
+      );
       expect(a.hashCode, equals(b.hashCode));
     });
 
     test('toString returns a readable format', () {
-      const s = DiscoveredServer(name: 'svc', host: '10.0.0.1', port: 4096);
-      expect(s.toString(), 'DiscoveredServer(name: svc, host: 10.0.0.1:4096)');
+      const s = DiscoveredServer(
+        name: 'opencode-4096',
+        host: '10.0.0.1',
+        port: 4096,
+      );
+      expect(
+        s.toString(),
+        'DiscoveredServer(name: opencode-4096, host: 10.0.0.1:4096)',
+      );
     });
   });
 
@@ -102,7 +121,7 @@ void main() {
           final subA = stream.listen(snapshotsA.add);
           final subB = stream.listen(snapshotsB.add);
 
-          fake.emit(_resolved('svc', '10.0.0.1', 4096));
+          fake.emit(_resolved('opencode-4096', '10.0.0.1', 4096));
           await _pump();
 
           expect(snapshotsA, hasLength(1));
@@ -168,7 +187,7 @@ void main() {
         fake.emit(
           BonsoirDiscoveryServiceFoundEvent(
             service: BonsoirService.ignoreNorms(
-              name: 'svc',
+              name: 'opencode-4096',
               type: '_http._tcp',
               port: 4096,
             ),
@@ -185,7 +204,7 @@ void main() {
         final sub = stream.listen(snapshots.add);
         await fake.subscribedCompleter.future;
 
-        fake.emit(_resolved('svc', '10.0.0.1', 4096));
+        fake.emit(_resolved('opencode-4096', '10.0.0.1', 4096));
         await _pump();
 
         expect(service.discoveredServers, hasLength(1));
@@ -201,8 +220,22 @@ void main() {
           service.startDiscovery();
           await fake.subscribedCompleter.future;
 
-          fake.emit(_resolved('svc', '10.0.0.1', 4096, attributes: {'v': '1'}));
-          fake.emit(_resolved('svc', '10.0.0.1', 4096, attributes: {'v': '2'}));
+          fake.emit(
+            _resolved(
+              'opencode-4096',
+              '10.0.0.1',
+              4096,
+              attributes: {'v': '1'},
+            ),
+          );
+          fake.emit(
+            _resolved(
+              'opencode-4096',
+              '10.0.0.1',
+              4096,
+              attributes: {'v': '2'},
+            ),
+          );
           await _pump();
 
           expect(service.discoveredServers, hasLength(1));
@@ -214,11 +247,13 @@ void main() {
         service.startDiscovery();
         await fake.subscribedCompleter.future;
 
-        fake.emit(_resolved('svc', '10.0.0.1', 4096, attributes: {'v': '1'}));
+        fake.emit(
+          _resolved('opencode-4096', '10.0.0.1', 4096, attributes: {'v': '1'}),
+        );
         fake.emit(
           BonsoirDiscoveryServiceUpdatedEvent(
             service: BonsoirService.ignoreNorms(
-              name: 'svc',
+              name: 'opencode-4096',
               type: '_http._tcp',
               host: '10.0.0.1',
               port: 4096,
@@ -238,7 +273,7 @@ void main() {
         fake.emit(
           BonsoirDiscoveryServiceUpdatedEvent(
             service: BonsoirService.ignoreNorms(
-              name: 'svc',
+              name: 'opencode-4096',
               type: '_http._tcp',
               port: 4096,
             ),
@@ -254,13 +289,13 @@ void main() {
         () async {
           service.startDiscovery();
           await fake.subscribedCompleter.future;
-          fake.emit(_resolved('svc', '10.0.0.1', 4096));
+          fake.emit(_resolved('opencode-4096', '10.0.0.1', 4096));
           await _pump();
 
           fake.emit(
             BonsoirDiscoveryServiceLostEvent(
               service: BonsoirService.ignoreNorms(
-                name: 'svc',
+                name: 'opencode-4096',
                 type: '_http._tcp',
                 host: '10.0.0.1',
                 port: 4096,
@@ -278,13 +313,13 @@ void main() {
         () async {
           service.startDiscovery();
           await fake.subscribedCompleter.future;
-          fake.emit(_resolved('svc', '10.0.0.1', 4096));
+          fake.emit(_resolved('opencode-4096', '10.0.0.1', 4096));
           await _pump();
 
           fake.emit(
             BonsoirDiscoveryServiceLostEvent(
               service: BonsoirService.ignoreNorms(
-                name: 'svc',
+                name: 'opencode-4096',
                 type: '_http._tcp',
                 port: 4096,
               ),
@@ -299,13 +334,13 @@ void main() {
       test('ServiceLostEvent for unknown service is a no-op', () async {
         service.startDiscovery();
         await fake.subscribedCompleter.future;
-        fake.emit(_resolved('known', '10.0.0.1', 4096));
+        fake.emit(_resolved('opencode-4096', '10.0.0.1', 4096));
         await _pump();
 
         fake.emit(
           BonsoirDiscoveryServiceLostEvent(
             service: BonsoirService.ignoreNorms(
-              name: 'unknown',
+              name: 'opencode-9999',
               type: '_http._tcp',
               host: '10.0.0.9',
               port: 4096,
@@ -336,6 +371,76 @@ void main() {
 
         expect(service.discoveredServers, isEmpty);
       });
+
+      test('a matching found event is sent to the resolver', () async {
+        service.startDiscovery();
+        await fake.subscribedCompleter.future;
+        final resolver = fake.resolver;
+
+        fake.emit(
+          BonsoirDiscoveryServiceFoundEvent(
+            service: BonsoirService.ignoreNorms(
+              name: 'opencode-4096',
+              type: '_http._tcp',
+              port: 4096,
+            ),
+          ),
+        );
+        await _pump();
+
+        expect(resolver.resolved, hasLength(1));
+        expect(resolver.resolved.single.name, 'opencode-4096');
+      });
+
+      test(
+        'an unrelated _http._tcp found event is not sent to the resolver',
+        () async {
+          service.startDiscovery();
+          await fake.subscribedCompleter.future;
+          final resolver = fake.resolver;
+
+          fake.emit(
+            BonsoirDiscoveryServiceFoundEvent(
+              service: BonsoirService.ignoreNorms(
+                name: 'printer-1234',
+                type: '_http._tcp',
+                port: 80,
+              ),
+            ),
+          );
+          await _pump();
+
+          expect(resolver.resolved, isEmpty);
+        },
+      );
+
+      test(
+        'unrelated resolved and updated events are neither inserted nor emitted',
+        () async {
+          final stream = service.startDiscovery();
+          final snapshots = <List<DiscoveredServer>>[];
+          final sub = stream.listen(snapshots.add);
+          await fake.subscribedCompleter.future;
+
+          fake.emit(_resolved('printer-1234', '10.0.0.9', 80));
+          fake.emit(
+            BonsoirDiscoveryServiceUpdatedEvent(
+              service: BonsoirService.ignoreNorms(
+                name: 'webcam-8080',
+                type: '_http._tcp',
+                host: '10.0.0.9',
+                port: 8080,
+              ),
+            ),
+          );
+          await _pump();
+
+          expect(service.discoveredServers, isEmpty);
+          expect(snapshots, isEmpty);
+
+          await sub.cancel();
+        },
+      );
 
       test('stream onError is forwarded via NetworkException', () async {
         final stream = service.startDiscovery();
@@ -373,7 +478,7 @@ void main() {
         final sub = stream.listen(snapshots.add);
         await fake.subscribedCompleter.future;
 
-        fake.emit(_resolved('svc', '10.0.0.1', 4096));
+        fake.emit(_resolved('opencode-4096', '10.0.0.1', 4096));
         await _pump();
 
         await service.stopDiscovery();
@@ -433,11 +538,17 @@ BonsoirDiscoveryServiceResolvedEvent _resolved(
 Future<void> _pump() => Future<void>.delayed(Duration.zero);
 
 class _FakeServiceResolver with ServiceResolver {
+  final List<BonsoirService> resolved = [];
+
   @override
-  Future<void> resolveService(BonsoirService service) async {}
+  Future<void> resolveService(BonsoirService service) async {
+    resolved.add(service);
+  }
 }
 
 class _FakeDiscovery extends Fake implements BonsoirDiscovery {
+  final _FakeServiceResolver resolver = _FakeServiceResolver();
+
   _FakeDiscovery() {
     _events = StreamController<BonsoirDiscoveryEvent>.broadcast(
       onListen: () {
@@ -464,7 +575,7 @@ class _FakeDiscovery extends Fake implements BonsoirDiscovery {
   Object? throwOnStart;
 
   @override
-  ServiceResolver get serviceResolver => _FakeServiceResolver();
+  ServiceResolver get serviceResolver => resolver;
 
   @override
   Future<void> initialize() async {

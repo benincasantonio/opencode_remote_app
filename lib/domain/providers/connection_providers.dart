@@ -108,6 +108,12 @@ class Connection extends _$Connection {
     String? username,
     String? password,
   }) async {
+    // One guard for every caller (manual, saved, discovered): ignore a new
+    // attempt while one is already in flight. Retries from error or
+    // disconnected are still allowed.
+    if (state.status == ConnectionStatus.connecting) {
+      return;
+    }
     final trimmedHost = host.trim();
     final displayName = '$trimmedHost:$port';
     final baseUrl = 'http://$trimmedHost:$port';
@@ -153,10 +159,7 @@ class Connection extends _$Connection {
         status: ConnectionStatus.error,
         baseUrl: baseUrl,
         displayName: displayName,
-        error: NetworkException(
-          'An unexpected error occurred: $error',
-          st,
-        ),
+        error: NetworkException('An unexpected error occurred: $error', st),
       );
     }
   }
@@ -172,12 +175,9 @@ class Connection extends _$Connection {
     String? password,
   }) async {
     try {
-      await ref.read(savedServerRepositoryProvider).save(
-        host: host,
-        port: port,
-        username: username,
-        password: password,
-      );
+      await ref
+          .read(savedServerRepositoryProvider)
+          .save(host: host, port: port, username: username, password: password);
       ref.invalidate(savedServersProvider);
     } on Object catch (error, st) {
       Logger.warning(

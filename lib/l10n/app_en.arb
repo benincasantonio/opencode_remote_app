@@ -7,23 +7,10 @@
   "statusConnecting": "Connecting…",
   "statusDisconnected": "Disconnected",
   "statusError": "Error",
-  "discoveryTitle": "mDNS Discovery",
-  "start": "Start",
-  "stop": "Stop",
-  "discovering": "DISCOVERING",
-  "idle": "IDLE",
-  "serverCount": "{count, plural, =1{1 server} other{{count} servers}}",
-  "@serverCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "searchingForServers": "Searching for servers…",
-  "noServersYet": "No servers yet.\nTap Start to begin discovery.",
+  "lanServersTitle": "Servers on your network",
+  "discoveryUnavailable": "LAN discovery is unavailable. Check local network access and try again.",
   "connectTitle": "Connect",
-  "openDiscoveryDebug": "Open mDNS Discovery",
   "hostLabel": "Host",
   "portLabel": "Port",
   "usernameLabel": "Username (optional)",

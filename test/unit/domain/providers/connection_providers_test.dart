@@ -24,7 +24,7 @@ void main() {
     late FakeCredentialStorage savedCredentials;
 
     ProviderContainer makeContainer({
-      required _StubServerRepository serverRepository,
+      required ServerRepository serverRepository,
       List<SavedServer> savedServers = const [],
     }) {
       savedStorage = FakeServerStorage(savedServers);
@@ -32,10 +32,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           dioClientProvider.overrideWithValue(
-            DioClient(
-              baseUrl: 'http://127.0.0.1:4096',
-              enableLogging: false,
-            ),
+            DioClient(baseUrl: 'http://127.0.0.1:4096', enableLogging: false),
           ),
           serverRepositoryProvider.overrideWithValue(serverRepository),
           savedServerRepositoryProvider.overrideWithValue(
@@ -45,6 +42,18 @@ void main() {
       );
       addTearDown(container.dispose);
       return container;
+    }
+
+    /// Waits until the fire-and-forget boot chain has finished.
+    Future<void> waitForBoot(ProviderContainer container) async {
+      for (var i = 0; i < 50; i++) {
+        await container.pump();
+        await Future<void>.delayed(Duration.zero);
+        if (!container.read(connectionProvider).bootInProgress) {
+          return;
+        }
+      }
+      fail('boot auto-connect did not settle');
     }
 
     test('sets connected state with health on success', () async {
@@ -90,10 +99,7 @@ void main() {
       expect(saved, hasLength(1));
       expect(saved.single.host, '192.168.1.10');
       expect(saved.single.port, 4096);
-      expect(
-        (await savedCredentials.get(saved.single.id))?.username,
-        'u',
-      );
+      expect((await savedCredentials.get(saved.single.id))?.username, 'u');
     });
 
     test('sets error state on AppException', () async {
@@ -103,12 +109,14 @@ void main() {
         ),
       );
 
-      await container.read(connectionProvider.notifier).connect(
-        host: 'example.com',
-        port: 4096,
-        username: 'u',
-        password: 'p',
-      );
+      await container
+          .read(connectionProvider.notifier)
+          .connect(
+            host: 'example.com',
+            port: 4096,
+            username: 'u',
+            password: 'p',
+          );
 
       final state = container.read(connectionProvider);
       expect(state.status, ConnectionStatus.error);
@@ -153,6 +161,64 @@ void main() {
         ConnectionStatus.connected,
       );
     });
+
+    test(
+      'a second connect attempt is ignored while one is in flight',
+      () async {
+        final completer = Completer<ServerHealth>();
+        final container = makeContainer(
+          serverRepository: _StubServerRepository(pending: completer.future),
+        );
+        await waitForBoot(container);
+
+        final first = container
+            .read(connectionProvider.notifier)
+            .connect(host: 'first-host', port: 1);
+        expect(
+          container.read(connectionProvider).status,
+          ConnectionStatus.connecting,
+        );
+
+        final second = container
+            .read(connectionProvider.notifier)
+            .connect(host: 'second-host', port: 2);
+        await second;
+
+        expect(
+          container.read(connectionProvider).displayName,
+          'first-host:1',
+          reason: 'first attempt keeps ownership of the in-flight connect',
+        );
+
+        completer.complete(const ServerHealth(healthy: true, version: '0'));
+        await first;
+
+        final state = container.read(connectionProvider);
+        expect(state.status, ConnectionStatus.connected);
+        expect(state.displayName, 'first-host:1');
+        expect(state.baseUrl, 'http://first-host:1');
+      },
+    );
+
+    test('retry after an error is still allowed', () async {
+      final repository = _FlakyServerRepository();
+      final container = makeContainer(serverRepository: repository);
+
+      await container
+          .read(connectionProvider.notifier)
+          .connect(host: 'host', port: 1);
+      expect(container.read(connectionProvider).status, ConnectionStatus.error);
+
+      await container
+          .read(connectionProvider.notifier)
+          .connect(host: 'host', port: 1);
+
+      expect(repository.calls, 2);
+      expect(
+        container.read(connectionProvider).status,
+        ConnectionStatus.connected,
+      );
+    });
   });
 
   group('Connection.boot auto-connect', () {
@@ -160,7 +226,7 @@ void main() {
     late FakeCredentialStorage savedCredentials;
 
     ProviderContainer makeContainer({
-      required _StubServerRepository serverRepository,
+      required ServerRepository serverRepository,
       List<SavedServer> savedServers = const [],
     }) {
       savedStorage = FakeServerStorage(savedServers);
@@ -168,10 +234,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           dioClientProvider.overrideWithValue(
-            DioClient(
-              baseUrl: 'http://127.0.0.1:4096',
-              enableLogging: false,
-            ),
+            DioClient(baseUrl: 'http://127.0.0.1:4096', enableLogging: false),
           ),
           serverRepositoryProvider.overrideWithValue(serverRepository),
           savedServerRepositoryProvider.overrideWithValue(
@@ -207,35 +270,34 @@ void main() {
       expect(state.status, ConnectionStatus.disconnected);
     });
 
-    test('connects to the default saved server with stored credentials',
-        () async {
-      savedCredentials.save(
-        'srv1',
-        (username: 'user', password: 'pass'),
-      );
-      final container = makeContainer(
-        serverRepository: _StubServerRepository(
-          health: const ServerHealth(healthy: true, version: '1.2.3'),
-        ),
-        savedServers: [
-          SavedServer(
-            id: 'srv1',
-            host: '192.168.1.10',
-            port: 4096,
-            isDefault: true,
+    test(
+      'connects to the default saved server with stored credentials',
+      () async {
+        savedCredentials.save('srv1', (username: 'user', password: 'pass'));
+        final container = makeContainer(
+          serverRepository: _StubServerRepository(
+            health: const ServerHealth(healthy: true, version: '1.2.3'),
           ),
-        ],
-      );
+          savedServers: [
+            SavedServer(
+              id: 'srv1',
+              host: '192.168.1.10',
+              port: 4096,
+              isDefault: true,
+            ),
+          ],
+        );
 
-      await waitForBoot(container);
+        await waitForBoot(container);
 
-      final state = container.read(connectionProvider);
-      expect(state.status, ConnectionStatus.connected);
-      expect(state.baseUrl, 'http://192.168.1.10:4096');
-      expect(state.displayName, '192.168.1.10:4096');
-      expect(state.bootInProgress, isFalse);
-      expect(container.read(isConnectedProvider), isTrue);
-    });
+        final state = container.read(connectionProvider);
+        expect(state.status, ConnectionStatus.connected);
+        expect(state.baseUrl, 'http://192.168.1.10:4096');
+        expect(state.displayName, '192.168.1.10:4096');
+        expect(state.bootInProgress, isFalse);
+        expect(container.read(isConnectedProvider), isTrue);
+      },
+    );
 
     test('ends disconnected when no saved server exists', () async {
       final container = makeContainer(
@@ -293,10 +355,7 @@ void main() {
             ),
           ),
           savedServerRepositoryProvider.overrideWithValue(
-            SavedServerRepository(
-              FakeServerStorage(),
-              FakeCredentialStorage(),
-            ),
+            SavedServerRepository(FakeServerStorage(), FakeCredentialStorage()),
           ),
         ],
       );
@@ -341,5 +400,20 @@ class _StubServerRepository extends ServerRepository {
       return Future.error(err);
     }
     return Future.value(health!);
+  }
+}
+
+class _FlakyServerRepository extends ServerRepository {
+  _FlakyServerRepository() : super(ServerDatasource(Dio()));
+
+  int calls = 0;
+
+  @override
+  Future<ServerHealth> getHealth() {
+    calls++;
+    if (calls == 1) {
+      return Future.error(const NetworkException('Connection refused'));
+    }
+    return Future.value(const ServerHealth(healthy: true, version: '1.2.3'));
   }
 }

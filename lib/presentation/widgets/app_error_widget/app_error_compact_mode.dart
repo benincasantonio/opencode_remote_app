@@ -46,8 +46,6 @@ class AppErrorCompactMode extends StatelessWidget {
               color: AppColors.textSecondary,
               onPressed: onRetry,
               tooltip: context.l10n.retry,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
             ),
           ],
         ],
