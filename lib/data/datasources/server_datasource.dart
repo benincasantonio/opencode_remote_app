@@ -11,10 +11,11 @@ class ServerDatasource {
   final Dio _dio;
 
   /// GET [/global/health](ApiConstants.healthPath).
-  Future<ServerHealth> getHealth() async {
+  Future<ServerHealth> getHealth({CancelToken? cancelToken}) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         ApiConstants.healthPath,
+        cancelToken: cancelToken,
       );
       final data = response.data;
       if (data == null) {

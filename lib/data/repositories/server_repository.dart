@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../datasources/server_datasource.dart';
 import '../models/server_health.dart';
 
@@ -8,5 +10,6 @@ class ServerRepository {
   final ServerDatasource _datasource;
 
   /// One-shot health check against the configured OpenCode server.
-  Future<ServerHealth> getHealth() => _datasource.getHealth();
+  Future<ServerHealth> getHealth({CancelToken? cancelToken}) =>
+      _datasource.getHealth(cancelToken: cancelToken);
 }

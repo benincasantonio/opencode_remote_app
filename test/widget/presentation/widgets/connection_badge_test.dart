@@ -102,6 +102,30 @@ void main() {
         final decoration = container.decoration as BoxDecoration?;
         expect(decoration?.color, AppColors.error);
       });
+
+      testWidgets(
+        'renders "Unhealthy" label with red dot for unhealthy status',
+        (tester) async {
+          await tester.pumpWidget(
+            const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+
+              home: Scaffold(
+                body: ConnectionBadge(status: ConnectionStatus.unhealthy),
+              ),
+            ),
+          );
+
+          expect(find.text('Unhealthy'), findsOneWidget);
+
+          final container = tester.widget<Container>(
+            find.byType(Container).first,
+          );
+          final decoration = container.decoration as BoxDecoration?;
+          expect(decoration?.color, AppColors.error);
+        },
+      );
     });
 
     group('server name', () {
