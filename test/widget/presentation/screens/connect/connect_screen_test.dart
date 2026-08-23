@@ -328,5 +328,6 @@ class _FailingServerRepository extends ServerRepository {
   final AppException error;
 
   @override
-  Future<ServerHealth> getHealth() => Future.error(error);
+  Future<ServerHealth> getHealth({CancelToken? cancelToken}) =>
+      Future.error(error);
 }

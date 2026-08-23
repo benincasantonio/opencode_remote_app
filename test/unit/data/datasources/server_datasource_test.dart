@@ -21,6 +21,19 @@ void main() {
       expect(health, const ServerHealth(healthy: true, version: '1.2.3'));
     });
 
+    test('forwards the exact optional CancelToken to Dio', () async {
+      final token = CancelToken();
+      final dio = Dio(BaseOptions(baseUrl: 'http://example.com'));
+      dio.httpClientAdapter = _Adapter((options) async {
+        expect(identical(options.cancelToken, token), isTrue);
+        return _jsonResponse(options, '{"healthy":true,"version":"1.2.3"}');
+      });
+
+      final health = await ServerDatasource(dio).getHealth(cancelToken: token);
+
+      expect(health, const ServerHealth(healthy: true, version: '1.2.3'));
+    });
+
     test('rethrows AppException from DioException.error', () async {
       final dio = Dio(BaseOptions(baseUrl: 'http://example.com'));
       dio.interceptors.add(

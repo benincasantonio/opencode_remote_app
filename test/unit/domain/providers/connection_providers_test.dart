@@ -391,7 +391,7 @@ class _StubServerRepository extends ServerRepository {
   final Future<ServerHealth>? _pending;
 
   @override
-  Future<ServerHealth> getHealth() {
+  Future<ServerHealth> getHealth({CancelToken? cancelToken}) {
     if (_pending != null) {
       return _pending;
     }
@@ -409,7 +409,7 @@ class _FlakyServerRepository extends ServerRepository {
   int calls = 0;
 
   @override
-  Future<ServerHealth> getHealth() {
+  Future<ServerHealth> getHealth({CancelToken? cancelToken}) {
     calls++;
     if (calls == 1) {
       return Future.error(const NetworkException('Connection refused'));

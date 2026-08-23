@@ -62,7 +62,7 @@ class _ConnectionBadgeState extends State<ConnectionBadge>
       ConnectionStatus.connected => AppColors.success,
       ConnectionStatus.connecting => AppColors.warning,
       ConnectionStatus.disconnected => AppColors.textMuted,
-      ConnectionStatus.error => AppColors.error,
+      ConnectionStatus.error || ConnectionStatus.unhealthy => AppColors.error,
     };
   }
 
@@ -73,6 +73,7 @@ class _ConnectionBadgeState extends State<ConnectionBadge>
       ConnectionStatus.connecting => l10n.statusConnecting,
       ConnectionStatus.disconnected => l10n.statusDisconnected,
       ConnectionStatus.error => l10n.statusError,
+      ConnectionStatus.unhealthy => l10n.statusUnhealthy,
     };
   }
 

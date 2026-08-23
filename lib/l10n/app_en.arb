@@ -7,6 +7,18 @@
   "statusConnecting": "Connecting…",
   "statusDisconnected": "Disconnected",
   "statusError": "Error",
+  "statusUnhealthy": "Unhealthy",
+  "cancel": "Cancel",
+  "disconnect": "Disconnect",
+  "disconnectDialogTitle": "Disconnect from server?",
+  "disconnectDialogMessage": "Disconnect from {server}? The server will remain saved for quick reconnect.",
+  "@disconnectDialogMessage": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "searchingForServers": "Searching for servers…",
   "lanServersTitle": "Servers on your network",
   "discoveryUnavailable": "LAN discovery is unavailable. Check local network access and try again.",
