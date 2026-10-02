@@ -88,14 +88,18 @@ Depends on F0 (#49). Settings CRUD for saved servers is F5; mDNS service already
 
 ## F2 - Sessions
 
-Goal: List, create, and delete sessions. Consumes the P4-01 Session models (no new models).
-Details:
-1. Datasource: session endpoints — GET /session (with scope/search/limit query), POST /session, DELETE /session/:id, GET /session/status.
-2. Repository: SessionRepository — list, create, delete, status.
-3. Providers: sessions list, session statuses; invalidate on changes.
-4. UI: SessionsListScreen (pull-to-refresh, swipe-to-delete, FAB), SessionTile, NewSessionDialog. Home screen shows recent sessions (navigate to chat when F3 lands).
-Acceptance: Sessions list loads from the server, sessions can be created and deleted, statuses reflect busy/idle/retry. Analyzer + tests pass.
-Testing: Unit tests for repository with mocked datasource; widget tests for the list screen (loading/data/error states).
+GitHub epic: [#52](https://github.com/benincasantonio/opencode_remote_app/issues/52). Split into **user-value** subtickets (not layer tickets). Consumes the P4-01 Session models (no new models).
+
+| Sub | User value | Issue |
+|---|---|---|
+| **F2.1** Browse sessions | View all sessions on `/sessions` with status badges & pull-to-refresh | [#80](https://github.com/benincasantonio/opencode_remote_app/issues/80) |
+| **F2.2** Create session | FAB on sessions screen opens dialog to create new session | [#81](https://github.com/benincasantonio/opencode_remote_app/issues/81) |
+| **F2.3** Delete session | Swipe-to-delete / confirm dialog to remove sessions | [#82](https://github.com/benincasantonio/opencode_remote_app/issues/82) |
+| **F2.4** Recent sessions on Home | Home dashboard shows recent sessions widget + quick access | [#83](https://github.com/benincasantonio/opencode_remote_app/issues/83) |
+
+Order: F2.1 → F2.2 → F2.3 → F2.4
+Epic acceptance: all four subtickets done; session lifecycle works end-to-end; analyzer + tests pass.
+Depends on F1 (#51) and chat models (#48).
 
 ## F3 - Chat
 
