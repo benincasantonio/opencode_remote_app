@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/providers/connection_providers.dart';
 import '../screens/connect/connect_screen.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/sessions/sessions_list_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -13,6 +14,9 @@ const connectPath = '/connect';
 
 /// Path for the home dashboard after a successful connect.
 const homePath = '/home';
+
+/// Path for the sessions list screen.
+const sessionsPath = '/sessions';
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
@@ -41,9 +45,10 @@ GoRouter appRouter(Ref ref) {
         path: connectPath,
         builder: (context, state) => const ConnectScreen(),
       ),
+      GoRoute(path: homePath, builder: (context, state) => const HomeScreen()),
       GoRoute(
-        path: homePath,
-        builder: (context, state) => const HomeScreen(),
+        path: sessionsPath,
+        builder: (context, state) => const SessionsListScreen(),
       ),
     ],
   );

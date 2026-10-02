@@ -159,4 +159,15 @@ void main() {
     expect(find.byType(ServerStatusWidget), findsOneWidget);
     expect(find.text('Retry'), findsNothing);
   });
+
+  testWidgets('renders view sessions button and app bar action', (
+    tester,
+  ) async {
+    final controller = openController();
+
+    await pumpHome(tester, controller.stream, connectedState());
+
+    expect(find.text('View sessions'), findsOneWidget);
+    expect(find.byIcon(Icons.forum_outlined), findsNWidgets(2));
+  });
 }

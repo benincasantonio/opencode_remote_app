@@ -31,12 +31,14 @@ class SavedServerTile extends ConsumerWidget {
     final credentials = await ref
         .read(savedServerRepositoryProvider)
         .getCredentials(server.id);
-    await ref.read(connectionProvider.notifier).connect(
-      host: server.host,
-      port: server.port,
-      username: credentials?.username,
-      password: credentials?.password,
-    );
+    await ref
+        .read(connectionProvider.notifier)
+        .connect(
+          host: server.host,
+          port: server.port,
+          username: credentials?.username,
+          password: credentials?.password,
+        );
   }
 
   Future<void> _onSetDefault(BuildContext context, WidgetRef ref) async {
@@ -81,10 +83,7 @@ class SavedServerTile extends ConsumerWidget {
                   size: AppSizing.iconSmall,
                 )
               : null,
-          title: Text(
-            server.displayName,
-            style: AppTypography.titleMedium,
-          ),
+          title: Text(server.displayName, style: AppTypography.titleMedium),
           subtitle: lastConnected == null
               ? null
               : Text(

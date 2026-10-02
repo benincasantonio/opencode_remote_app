@@ -14,11 +14,11 @@ void main() {
   test(
     'fixture using a deprecated Flutter API fails analysis',
     () async {
-      final result = await Process.run(
-        'flutter',
-        ['analyze', '--no-pub', 'test/fixtures/deprecated_api_fixture.dart'],
-        workingDirectory: Directory.current.path,
-      );
+      final result = await Process.run('flutter', [
+        'analyze',
+        '--no-pub',
+        'test/fixtures/deprecated_api_fixture.dart',
+      ], workingDirectory: Directory.current.path);
 
       final output = '${result.stdout}\n${result.stderr}';
 

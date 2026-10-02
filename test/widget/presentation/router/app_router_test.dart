@@ -6,6 +6,7 @@ import 'package:opencode_remote_app/data/models/server_health.dart';
 import 'package:opencode_remote_app/domain/providers/connection_providers.dart';
 import 'package:opencode_remote_app/domain/providers/discovery_providers.dart';
 import 'package:opencode_remote_app/domain/providers/server_providers.dart';
+import 'package:opencode_remote_app/domain/providers/session_providers.dart';
 import 'package:opencode_remote_app/presentation/router/app_router.dart';
 import 'package:opencode_remote_app/presentation/widgets/app_button/app_button.dart';
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
@@ -94,6 +95,46 @@ void main() {
       expect(prefs.getString('saved_servers_v1'), isNull);
     },
   );
+
+  testWidgets('GoRouter redirects /sessions to /connect when disconnected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_TestApp(overrides: const []));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(MaterialApp));
+    final container = ProviderScope.containerOf(context);
+    final router = container.read(appRouterProvider);
+
+    router.go(sessionsPath);
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.path, connectPath);
+    expect(find.text('Host'), findsOneWidget);
+  });
+
+  testWidgets('allows navigation to /sessions when connected', (tester) async {
+    await tester.pumpWidget(
+      _TestApp(
+        overrides: [
+          connectionProvider.overrideWith(() => _ConnectedNotifier()),
+          healthPollingProvider.overrideWith(
+            (ref) => const Stream<ServerHealth>.empty(),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(MaterialApp));
+    final router = ProviderScope.containerOf(context).read(appRouterProvider);
+
+    router.go(sessionsPath);
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.path, sessionsPath);
+    expect(find.text('Sessions'), findsOneWidget);
+  });
 }
 
 class _TestApp extends StatelessWidget {
@@ -108,6 +149,8 @@ class _TestApp extends StatelessWidget {
         discoveredServersProvider.overrideWith(
           (ref) => const Stream<List<DiscoveredServer>>.empty(),
         ),
+        sessionsListProvider.overrideWith((ref) => Future.value([])),
+        sessionStatusesProvider.overrideWith((ref) => Future.value({})),
         ...overrides,
       ],
       child: const App(),

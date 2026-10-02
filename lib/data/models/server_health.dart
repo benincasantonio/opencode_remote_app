@@ -6,10 +6,8 @@ part 'server_health.g.dart';
 /// Response from `GET /global/health`.
 @freezed
 sealed class ServerHealth with _$ServerHealth {
-  const factory ServerHealth({
-    required bool healthy,
-    required String version,
-  }) = _ServerHealth;
+  const factory ServerHealth({required bool healthy, required String version}) =
+      _ServerHealth;
 
   factory ServerHealth.fromJson(Map<String, dynamic> json) =>
       _$ServerHealthFromJson(json);
