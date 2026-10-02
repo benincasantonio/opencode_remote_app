@@ -15,20 +15,20 @@ void main() {
       store.clear();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
-        final args = call.arguments as Map<Object?, Object?>;
-        switch (call.method) {
-          case 'read':
-            return store[args['key'] as String?];
-          case 'write':
-            store[args['key'] as String] = args['value'] as String;
-            return null;
-          case 'delete':
-            store.remove(args['key'] as String);
-            return null;
-          default:
-            return null;
-        }
-      });
+            final args = call.arguments as Map<Object?, Object?>;
+            switch (call.method) {
+              case 'read':
+                return store[args['key'] as String?];
+              case 'write':
+                store[args['key'] as String] = args['value'] as String;
+                return null;
+              case 'delete':
+                store.remove(args['key'] as String);
+                return null;
+              default:
+                return null;
+            }
+          });
       storage = SecureCredentialStorage();
     });
 

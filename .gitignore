@@ -31,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/ios/build/
 /coverage/
 
 # Generated files (never committed; regenerate via `make generate`)

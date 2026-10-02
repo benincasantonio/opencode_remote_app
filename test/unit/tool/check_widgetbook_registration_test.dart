@@ -26,7 +26,10 @@ void main() {
   }
 
   test('returns empty when every use case is registered', () {
-    final libDir = buildUseCaseFiles(['alpha_use_case.dart', 'beta_use_case.dart']);
+    final libDir = buildUseCaseFiles([
+      'alpha_use_case.dart',
+      'beta_use_case.dart',
+    ]);
     File('${libDir.path}/main.directories.g.dart').writeAsStringSync(
       "import 'package:widgetbook_workspace/alpha_use_case.dart' as a;\n"
       "import 'package:widgetbook_workspace/beta_use_case.dart' as b;\n",
@@ -36,7 +39,10 @@ void main() {
   });
 
   test('reports a deliberately stale registration', () {
-    final libDir = buildUseCaseFiles(['alpha_use_case.dart', 'beta_use_case.dart']);
+    final libDir = buildUseCaseFiles([
+      'alpha_use_case.dart',
+      'beta_use_case.dart',
+    ]);
     File('${libDir.path}/main.directories.g.dart').writeAsStringSync(
       "import 'package:widgetbook_workspace/alpha_use_case.dart' as a;\n",
     );
@@ -47,7 +53,10 @@ void main() {
   });
 
   test('reports every use case when the generated file is missing', () {
-    final libDir = buildUseCaseFiles(['alpha_use_case.dart', 'beta_use_case.dart']);
+    final libDir = buildUseCaseFiles([
+      'alpha_use_case.dart',
+      'beta_use_case.dart',
+    ]);
 
     final unregistered = findUnregisteredUseCases(libDir);
     expect(unregistered, hasLength(2));

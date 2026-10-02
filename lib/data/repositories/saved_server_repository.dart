@@ -28,7 +28,8 @@ class SavedServerRepository {
         return server;
       }
     }
-    final byLastConnected = [...servers]..sort((a, b) {
+    final byLastConnected = [...servers]
+      ..sort((a, b) {
         final aTime = a.lastConnectedAt?.millisecondsSinceEpoch ?? 0;
         final bTime = b.lastConnectedAt?.millisecondsSinceEpoch ?? 0;
         return bTime.compareTo(aTime);
@@ -50,19 +51,21 @@ class SavedServerRepository {
     final servers = await _storage.getAll();
     final existing = _findByHostPort(servers, trimmedHost, port);
 
-    final server = (existing ??
-        SavedServer(id: _generateId(), host: trimmedHost, port: port)).copyWith(
-      host: trimmedHost,
-      port: port,
-      isDefault: existing?.isDefault ?? servers.isEmpty,
-      lastConnectedAt: DateTime.now(),
-    );
+    final server =
+        (existing ??
+                SavedServer(id: _generateId(), host: trimmedHost, port: port))
+            .copyWith(
+              host: trimmedHost,
+              port: port,
+              isDefault: existing?.isDefault ?? servers.isEmpty,
+              lastConnectedAt: DateTime.now(),
+            );
 
     if (username != null || password != null) {
-      await _credentials.save(
-        server.id,
-        (username: username, password: password),
-      );
+      await _credentials.save(server.id, (
+        username: username,
+        password: password,
+      ));
     } else {
       await _credentials.delete(server.id);
     }
@@ -99,14 +102,12 @@ class SavedServerRepository {
   Future<void> setDefault(String id) async {
     final servers = await _storage.getAll();
     await _storage.saveAll([
-      for (final server in servers)
-        server.copyWith(isDefault: server.id == id),
+      for (final server in servers) server.copyWith(isDefault: server.id == id),
     ]);
   }
 
   /// Credentials for [id], or `null` when none are stored.
-  Future<ServerCredentials?> getCredentials(String id) =>
-      _credentials.get(id);
+  Future<ServerCredentials?> getCredentials(String id) => _credentials.get(id);
 
   static SavedServer? _findByHostPort(
     List<SavedServer> servers,

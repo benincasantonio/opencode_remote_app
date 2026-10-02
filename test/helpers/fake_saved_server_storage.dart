@@ -4,8 +4,7 @@ import 'package:opencode_remote_app/data/models/saved_server.dart';
 
 /// In-memory [ServerStorageDatasource] for tests.
 class FakeServerStorage extends ServerStorageDatasource {
-  FakeServerStorage([List<SavedServer>? initial])
-    : _servers = [...?initial];
+  FakeServerStorage([List<SavedServer>? initial]) : _servers = [...?initial];
 
   final List<SavedServer> _servers;
 

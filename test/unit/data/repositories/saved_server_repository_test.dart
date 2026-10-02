@@ -57,13 +57,16 @@ void main() {
         expect((await repository.getDefault())?.id, 'b');
       });
 
-      test('falls back to the most recently connected when no default', () async {
-        storage.saveAll([
-          server(id: 'old', lastConnectedAt: DateTime(2026, 1, 1)),
-          server(id: 'new', lastConnectedAt: DateTime(2026, 8, 1)),
-        ]);
-        expect((await repository.getDefault())?.id, 'new');
-      });
+      test(
+        'falls back to the most recently connected when no default',
+        () async {
+          storage.saveAll([
+            server(id: 'old', lastConnectedAt: DateTime(2026, 1, 1)),
+            server(id: 'new', lastConnectedAt: DateTime(2026, 8, 1)),
+          ]);
+          expect((await repository.getDefault())?.id, 'new');
+        },
+      );
     });
 
     group('save', () {
@@ -127,15 +130,17 @@ void main() {
         expect(await repository.getCredentials(saved.id), isNull);
       });
 
-      test('promotes the first remaining server when deleting the default',
-          () async {
-        await repository.save(host: 'a', port: 1);
-        await repository.save(host: 'b', port: 2);
-        final servers = await repository.getAll();
-        await repository.delete(servers.first.id);
-        final remaining = await repository.getAll();
-        expect(remaining.single.isDefault, isTrue);
-      });
+      test(
+        'promotes the first remaining server when deleting the default',
+        () async {
+          await repository.save(host: 'a', port: 1);
+          await repository.save(host: 'b', port: 2);
+          final servers = await repository.getAll();
+          await repository.delete(servers.first.id);
+          final remaining = await repository.getAll();
+          expect(remaining.single.isDefault, isTrue);
+        },
+      );
     });
 
     group('setDefault', () {

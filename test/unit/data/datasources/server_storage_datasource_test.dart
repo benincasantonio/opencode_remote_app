@@ -31,9 +31,7 @@ void main() {
     });
 
     test('saveAll replaces the previous list', () async {
-      await datasource.saveAll([
-        SavedServer(id: '1', host: 'a', port: 1),
-      ]);
+      await datasource.saveAll([SavedServer(id: '1', host: 'a', port: 1)]);
       await datasource.saveAll([
         SavedServer(id: '2', host: 'b', port: 2),
         SavedServer(id: '3', host: 'c', port: 3),
@@ -44,20 +42,14 @@ void main() {
 
     test('corrupted payload throws CacheException', () async {
       SharedPreferences.setMockInitialValues({'saved_servers_v1': 'nope'});
-      expect(
-        () => datasource.getAll(),
-        throwsA(isA<CacheException>()),
-      );
+      expect(() => datasource.getAll(), throwsA(isA<CacheException>()));
     });
 
     test('malformed list entry throws CacheException', () async {
       SharedPreferences.setMockInitialValues({
         'saved_servers_v1': '[{"host": "missing-fields"}]',
       });
-      expect(
-        () => datasource.getAll(),
-        throwsA(isA<CacheException>()),
-      );
+      expect(() => datasource.getAll(), throwsA(isA<CacheException>()));
     });
   });
 }
