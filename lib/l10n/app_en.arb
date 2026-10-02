@@ -65,5 +65,22 @@
       }
     }
   },
-  "serverHealthUnavailable": "Health information unavailable"
+  "serverHealthUnavailable": "Health information unavailable",
+  "sessionsTitle": "Sessions",
+  "viewSessions": "View sessions",
+  "noSessionsTitle": "No sessions yet",
+  "noSessionsSubtitle": "Pull down to refresh or check server",
+  "sessionsErrorTitle": "Could not load sessions",
+  "sessionStatusIdle": "Idle",
+  "sessionStatusBusy": "Busy",
+  "sessionStatusRetry": "Retry",
+  "sessionUpdatedAgo": "Updated {timeAgo}",
+  "@sessionUpdatedAgo": {
+    "placeholders": {
+      "timeAgo": {
+        "type": "String"
+      }
+    }
+  }
 }
+

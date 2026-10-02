@@ -1,0 +1,115 @@
+import 'package:dio/dio.dart';
+
+import '../../core/constants/api_constants.dart';
+import '../../core/errors/app_exception.dart';
+import '../models/session.dart';
+
+/// HTTP datasource for OpenCode session endpoints.
+class SessionDatasource {
+  SessionDatasource(this._dio);
+
+  final Dio _dio;
+
+  /// GET [/session](ApiConstants.sessionPath).
+  Future<List<Session>> getSessions({
+    String? directory,
+    String? roots,
+    int? limit,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'directory': ?directory,
+        'roots': ?roots,
+        'limit': ?limit,
+      };
+
+      final response = await _dio.get<List<dynamic>>(
+        ApiConstants.sessionPath,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        cancelToken: cancelToken,
+      );
+
+      final data = response.data;
+      if (data == null) {
+        throw const ParseException('Empty session list response');
+      }
+
+      return data
+          .map((item) => Session.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (error) {
+      final mapped = error.error;
+      if (mapped is AppException) {
+        throw mapped;
+      }
+      if (error.error is TypeError) {
+        throw ParseException(
+          'Failed to parse session list response: ${error.error}',
+          stackTrace: error.stackTrace,
+        );
+      }
+      rethrow;
+    } on AppException {
+      rethrow;
+    } on Object catch (error, st) {
+      throw ParseException(
+        'Failed to parse session list response: $error',
+        stackTrace: st,
+      );
+    }
+  }
+
+  /// GET [/session/status](ApiConstants.sessionStatusPath).
+  Future<Map<String, SessionStatus>> getSessionStatus({
+    String? directory,
+    String? workspace,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'directory': ?directory,
+        'workspace': ?workspace,
+      };
+
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiConstants.sessionStatusPath,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        cancelToken: cancelToken,
+      );
+
+      final data = response.data;
+      if (data == null) {
+        throw const ParseException('Empty session status response');
+      }
+
+      final result = <String, SessionStatus>{};
+      for (final entry in data.entries) {
+        final value = entry.value;
+        if (value is Map<String, dynamic>) {
+          result[entry.key] = SessionStatus.fromJson(value);
+        }
+      }
+      return result;
+    } on DioException catch (error) {
+      final mapped = error.error;
+      if (mapped is AppException) {
+        throw mapped;
+      }
+      if (error.error is TypeError) {
+        throw ParseException(
+          'Failed to parse session status response: ${error.error}',
+          stackTrace: error.stackTrace,
+        );
+      }
+      rethrow;
+    } on AppException {
+      rethrow;
+    } on Object catch (error, st) {
+      throw ParseException(
+        'Failed to parse session status response: $error',
+        stackTrace: st,
+      );
+    }
+  }
+}

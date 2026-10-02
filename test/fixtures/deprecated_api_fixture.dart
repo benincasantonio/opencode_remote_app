@@ -15,9 +15,6 @@ class DeprecatedApiFixture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => true,
-      child: const SizedBox(),
-    );
+    return WillPopScope(onWillPop: () async => true, child: const SizedBox());
   }
 }
