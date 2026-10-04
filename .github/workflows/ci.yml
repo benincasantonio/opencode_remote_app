@@ -114,12 +114,12 @@ jobs:
           restore-keys: |
             build-wb-${{ runner.os }}-
 
-      # Widgetbook imports app l10n (gitignored); generate it before analyze.
+      # Widgetbook imports app providers, DTOs and l10n (all gitignored).
       - name: Install app dependencies
         run: flutter pub get
 
-      - name: Generate app l10n
-        run: flutter gen-l10n
+      - name: Generate app code
+        run: make generate-ci
 
       - name: Install Widgetbook dependencies
         run: cd widgetbook && flutter pub get
