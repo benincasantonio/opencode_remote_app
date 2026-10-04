@@ -66,6 +66,12 @@ Future<List<Session>> sessionsList(Ref ref) async {
   return sorted;
 }
 
+/// Derives the dashboard preview from the same cache as the full list.
+@riverpod
+AsyncValue<List<Session>> recentSessions(Ref ref) => ref
+    .watch(sessionsListProvider)
+    .whenData((sessions) => sessions.take(5).toList());
+
 /// Fetches the map of session statuses from the server.
 @riverpod
 Future<Map<String, SessionStatus>> sessionStatuses(Ref ref) async {

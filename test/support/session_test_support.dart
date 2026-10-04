@@ -55,6 +55,7 @@ class FakeSessionRepository implements SessionRepository {
   final inputs = <CreateSessionInput>[];
   Object? createError;
   Object? listError;
+  Future<List<Session>>? pendingSessions;
   Future<Session>? pendingCreation;
   CancelToken? creationToken;
   int listCalls = 0;
@@ -83,7 +84,7 @@ class FakeSessionRepository implements SessionRepository {
     listCalls++;
     final error = listError;
     if (error != null) throw error;
-    return sessions;
+    return pendingSessions ?? sessions;
   }
 
   @override

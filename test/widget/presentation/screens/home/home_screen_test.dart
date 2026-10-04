@@ -7,6 +7,7 @@ import 'package:opencode_remote_app/core/errors/errors.dart';
 import 'package:opencode_remote_app/data/models/server_health.dart';
 import 'package:opencode_remote_app/domain/providers/connection_providers.dart';
 import 'package:opencode_remote_app/domain/providers/server_providers.dart';
+import 'package:opencode_remote_app/domain/providers/session_providers.dart';
 import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/presentation/screens/home/home_screen.dart';
 import 'package:opencode_remote_app/presentation/screens/home/server_status_widget.dart';
@@ -40,6 +41,7 @@ void main() {
         overrides: [
           connectionProvider.overrideWithValue(connection),
           healthPollingProvider.overrideWith((ref) => healthStream),
+          sessionsListProvider.overrideWith((ref) async => []),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -167,7 +169,8 @@ void main() {
 
     await pumpHome(tester, controller.stream, connectedState());
 
-    expect(find.text('View sessions'), findsOneWidget);
-    expect(find.byIcon(Icons.forum_outlined), findsNWidgets(2));
+    expect(find.text('View all'), findsOneWidget);
+    expect(find.text('New session'), findsOneWidget);
+    expect(find.byIcon(Icons.forum_outlined), findsOneWidget);
   });
 }
