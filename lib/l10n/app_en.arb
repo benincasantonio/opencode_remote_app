@@ -77,6 +77,9 @@
   "creatingSession": "Creating…",
   "createSessionError": "Could not create the session. Please try again.",
   "viewSessions": "View sessions",
+  "recentSessions": "Recent sessions",
+  "viewAllSessions": "View all",
+  "loadingSessions": "Loading sessions",
   "deleteSession": "Delete session",
   "deleteSessionConfirmation": "Delete “{title}”? This cannot be undone.",
   "@deleteSessionConfirmation": {

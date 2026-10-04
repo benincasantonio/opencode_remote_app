@@ -4,15 +4,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_sizing.dart';
 import '../../../core/utils/context_extensions.dart';
+import '../../../data/models/session.dart';
 import '../../../domain/providers/connection_providers.dart';
 import '../../../domain/providers/server_providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/app_bar/terminal_app_bar.dart';
-import '../../widgets/app_button/app_button.dart';
 import '../../widgets/connection_badge/connection_status.dart';
+import '../sessions/new_session_dialog.dart';
+import 'recent_sessions_widget.dart';
 import 'server_status_widget.dart';
 
-/// Home dashboard: live health status while connected.
+/// Home dashboard: live server health and the five most recent sessions.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -59,12 +61,12 @@ class HomeScreen extends ConsumerWidget {
                   ref.read(connectionProvider.notifier).disconnect(),
             ),
             const SizedBox(height: AppSizing.gapLarge),
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                label: l10n.viewSessions,
-                icon: Icons.forum_outlined,
-                onPressed: () => context.push(sessionsPath),
+            RecentSessionsWidget(
+              onViewAll: () => context.push(sessionsPath),
+              onNewSession: () => showDialog<Session>(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const NewSessionDialog(),
               ),
             ),
           ],
