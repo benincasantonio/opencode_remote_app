@@ -163,10 +163,9 @@ void main() {
       expect(model['variant'], 'xhigh');
     });
 
-    test('omits absent fields as nulls', () {
+    test('omits absent fields from the POST body', () {
       final json = const CreateSessionInput().toJson();
-      expect(json.keys, hasLength(7));
-      expect(json.values.every((value) => value == null), isTrue);
+      expect(json, isEmpty);
     });
   });
 }

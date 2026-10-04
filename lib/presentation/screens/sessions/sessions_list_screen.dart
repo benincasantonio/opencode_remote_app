@@ -11,6 +11,7 @@ import '../../widgets/app_bar/terminal_app_bar.dart';
 import '../../widgets/app_error_widget/app_error_widget.dart';
 import '../../widgets/connection_badge/connection_status.dart';
 import '../../widgets/loading_indicator/loading_indicator.dart';
+import 'new_session_dialog.dart';
 import 'session_tile.dart';
 import 'sessions_empty_view.dart';
 
@@ -45,6 +46,15 @@ class SessionsListScreen extends ConsumerWidget {
     final statusesAsync = ref.watch(sessionStatusesProvider);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        tooltip: l10n.newSession,
+        onPressed: () => showDialog<Session>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const NewSessionDialog(),
+        ),
+        child: const Icon(Icons.add),
+      ),
       appBar: TerminalAppBar(
         title: l10n.sessionsTitle,
         connectionStatus: status,
@@ -57,8 +67,10 @@ class SessionsListScreen extends ConsumerWidget {
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.7,
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height * 0.7,
+                    ),
                     child: const SessionsEmptyView(),
                   ),
                 ],
@@ -90,8 +102,10 @@ class SessionsListScreen extends ConsumerWidget {
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.7,
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.sizeOf(context).height * 0.7,
+                ),
                 child: Center(
                   child: AppErrorWidget(
                     message: l10n.sessionsErrorTitle,

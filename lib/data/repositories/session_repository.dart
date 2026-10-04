@@ -9,6 +9,11 @@ class SessionRepository {
 
   final SessionDatasource _datasource;
 
+  Future<Session> createSession(
+    CreateSessionInput input, {
+    CancelToken? cancelToken,
+  }) => _datasource.createSession(input, cancelToken: cancelToken);
+
   /// Fetches the list of sessions from the OpenCode server.
   Future<List<Session>> getSessions({
     String? directory,

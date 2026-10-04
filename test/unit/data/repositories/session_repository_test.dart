@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:opencode_remote_app/core/errors/app_exception.dart';
 import 'package:opencode_remote_app/data/datasources/session_datasource.dart';
 import 'package:opencode_remote_app/data/models/session.dart';
 import 'package:opencode_remote_app/data/repositories/session_repository.dart';
@@ -13,6 +14,20 @@ class _FakeSessionDatasource implements SessionDatasource {
   int? lastLimit;
   String? lastWorkspace;
   CancelToken? lastCancelToken;
+  CreateSessionInput? lastInput;
+  Object? createError;
+
+  @override
+  Future<Session> createSession(
+    CreateSessionInput input, {
+    CancelToken? cancelToken,
+  }) async {
+    lastInput = input;
+    lastCancelToken = cancelToken;
+    final error = createError;
+    if (error != null) throw error;
+    return sessionsResult.single;
+  }
 
   @override
   Future<List<Session>> getSessions({
@@ -50,6 +65,36 @@ void main() {
       fakeDatasource = _FakeSessionDatasource();
       repository = SessionRepository(fakeDatasource);
     });
+
+    test(
+      'createSession forwards input, cancellation, result and errors',
+      () async {
+        const session = Session(
+          id: 'ses_new',
+          slug: 'new',
+          projectID: 'global',
+          directory: '/dir',
+          title: 'New',
+          version: '1',
+          time: SessionTime(created: 1, updated: 1),
+        );
+        const input = CreateSessionInput(title: 'New', agent: 'build');
+        final token = CancelToken();
+        fakeDatasource.sessionsResult = [session];
+        expect(
+          await repository.createSession(input, cancelToken: token),
+          session,
+        );
+        expect(fakeDatasource.lastInput, input);
+        expect(fakeDatasource.lastCancelToken, same(token));
+        const error = NetworkException('offline');
+        fakeDatasource.createError = error;
+        await expectLater(
+          repository.createSession(input),
+          throwsA(same(error)),
+        );
+      },
+    );
 
     test('getSessions forwards arguments and returns sessions', () async {
       const sampleSession = Session(
