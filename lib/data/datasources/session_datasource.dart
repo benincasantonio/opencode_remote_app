@@ -10,41 +10,33 @@ class SessionDatasource {
 
   final Dio _dio;
 
+  Future<void> deleteSession(String id, {CancelToken? cancelToken}) =>
+      _request(() async {
+        final response = await _dio.delete<bool>(
+          '${ApiConstants.sessionPath}/${Uri.encodeComponent(id)}',
+          cancelToken: cancelToken,
+        );
+        if (response.data != true) {
+          throw const ParseException('Session deletion was not confirmed');
+        }
+      });
+
   /// POST [/session](ApiConstants.sessionPath).
   Future<Session> createSession(
     CreateSessionInput input, {
     CancelToken? cancelToken,
-  }) async {
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiConstants.sessionPath,
-        data: input.toJson(),
-        cancelToken: cancelToken,
-      );
-      final data = response.data;
-      if (data == null) {
-        throw const ParseException('Empty session creation response');
-      }
-      return Session.fromJson(data);
-    } on DioException catch (error) {
-      final mapped = error.error;
-      if (mapped is AppException) throw mapped;
-      if (mapped is TypeError || mapped is FormatException) {
-        throw ParseException(
-          'Failed to parse session creation response: $mapped',
-          stackTrace: error.stackTrace,
-        );
-      }
-      rethrow;
-    } on AppException {
-      rethrow;
-    } on Object catch (error, st) {
-      throw ParseException(
-        'Failed to parse session creation response: $error',
-        stackTrace: st,
-      );
+  }) => _request(() async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      ApiConstants.sessionPath,
+      data: input.toJson(),
+      cancelToken: cancelToken,
+    );
+    final data = response.data;
+    if (data == null) {
+      throw const ParseException('Empty session creation response');
     }
-  }
+    return Session.fromJson(data);
+  });
 
   /// GET [/session](ApiConstants.sessionPath).
   Future<List<Session>> getSessions({
@@ -52,89 +44,70 @@ class SessionDatasource {
     String? roots,
     int? limit,
     CancelToken? cancelToken,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'directory': ?directory,
-        'roots': ?roots,
-        'limit': ?limit,
-      };
+  }) => _request(() async {
+    final queryParams = <String, dynamic>{
+      'directory': ?directory,
+      'roots': ?roots,
+      'limit': ?limit,
+    };
 
-      final response = await _dio.get<List<dynamic>>(
-        ApiConstants.sessionPath,
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
-        cancelToken: cancelToken,
-      );
+    final response = await _dio.get<List<dynamic>>(
+      ApiConstants.sessionPath,
+      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      cancelToken: cancelToken,
+    );
 
-      final data = response.data;
-      if (data == null) {
-        throw const ParseException('Empty session list response');
-      }
-
-      return data
-          .map((item) => Session.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } on DioException catch (error) {
-      final mapped = error.error;
-      if (mapped is AppException) {
-        throw mapped;
-      }
-      if (error.error is TypeError) {
-        throw ParseException(
-          'Failed to parse session list response: ${error.error}',
-          stackTrace: error.stackTrace,
-        );
-      }
-      rethrow;
-    } on AppException {
-      rethrow;
-    } on Object catch (error, st) {
-      throw ParseException(
-        'Failed to parse session list response: $error',
-        stackTrace: st,
-      );
+    final data = response.data;
+    if (data == null) {
+      throw const ParseException('Empty session list response');
     }
-  }
+
+    return data
+        .map((item) => Session.fromJson(item as Map<String, dynamic>))
+        .toList();
+  });
 
   /// GET [/session/status](ApiConstants.sessionStatusPath).
   Future<Map<String, SessionStatus>> getSessionStatus({
     String? directory,
     String? workspace,
     CancelToken? cancelToken,
-  }) async {
+  }) => _request(() async {
+    final queryParams = <String, dynamic>{
+      'directory': ?directory,
+      'workspace': ?workspace,
+    };
+
+    final response = await _dio.get<Map<String, dynamic>>(
+      ApiConstants.sessionStatusPath,
+      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      cancelToken: cancelToken,
+    );
+
+    final data = response.data;
+    if (data == null) {
+      throw const ParseException('Empty session status response');
+    }
+
+    final result = <String, SessionStatus>{};
+    for (final entry in data.entries) {
+      final value = entry.value;
+      if (value is Map<String, dynamic>) {
+        result[entry.key] = SessionStatus.fromJson(value);
+      }
+    }
+    return result;
+  });
+
+  Future<T> _request<T>(Future<T> Function() request) async {
     try {
-      final queryParams = <String, dynamic>{
-        'directory': ?directory,
-        'workspace': ?workspace,
-      };
-
-      final response = await _dio.get<Map<String, dynamic>>(
-        ApiConstants.sessionStatusPath,
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
-        cancelToken: cancelToken,
-      );
-
-      final data = response.data;
-      if (data == null) {
-        throw const ParseException('Empty session status response');
-      }
-
-      final result = <String, SessionStatus>{};
-      for (final entry in data.entries) {
-        final value = entry.value;
-        if (value is Map<String, dynamic>) {
-          result[entry.key] = SessionStatus.fromJson(value);
-        }
-      }
-      return result;
+      return await request();
     } on DioException catch (error) {
       final mapped = error.error;
-      if (mapped is AppException) {
-        throw mapped;
-      }
-      if (error.error is TypeError) {
+      if (mapped is AppException) throw mapped;
+      if (mapped is TypeError || mapped is FormatException) {
         throw ParseException(
-          'Failed to parse session status response: ${error.error}',
+          'Failed to parse session response: $mapped',
           stackTrace: error.stackTrace,
         );
       }
@@ -143,7 +116,7 @@ class SessionDatasource {
       rethrow;
     } on Object catch (error, st) {
       throw ParseException(
-        'Failed to parse session status response: $error',
+        'Failed to parse session response: $error',
         stackTrace: st,
       );
     }

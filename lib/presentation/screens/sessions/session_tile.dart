@@ -16,11 +16,13 @@ class SessionTile extends StatelessWidget {
     required this.session,
     this.status = const SessionStatus.idle(),
     this.onTap,
+    this.trailing,
   });
 
   final Session session;
   final SessionStatus status;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +90,18 @@ class SessionTile extends StatelessWidget {
               ),
 
               const SizedBox(height: AppSizing.gapSmall),
-              Text(
-                updatedText,
-                style: AppTypography.label.copyWith(color: AppColors.textMuted),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      updatedText,
+                      style: AppTypography.label.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                  ?trailing,
+                ],
               ),
             ],
           ),

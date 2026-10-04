@@ -77,6 +77,13 @@
   "creatingSession": "Creating…",
   "createSessionError": "Could not create the session. Please try again.",
   "viewSessions": "View sessions",
+  "deleteSession": "Delete session",
+  "deleteSessionConfirmation": "Delete “{title}”? This cannot be undone.",
+  "@deleteSessionConfirmation": {
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "sessionDeleted": "Session deleted",
+  "deleteSessionError": "Could not delete the session. Please try again.",
   "noSessionsTitle": "No sessions yet",
   "noSessionsSubtitle": "Pull down to refresh or check server",
   "sessionsErrorTitle": "Could not load sessions",
