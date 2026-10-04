@@ -1,42 +1,16 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:opencode_remote_app/data/models/session.dart';
-import 'package:opencode_remote_app/data/repositories/session_repository.dart';
 import 'package:opencode_remote_app/domain/providers/session_providers.dart';
 
-class _FakeSessionRepository implements SessionRepository {
-  List<Session> sessions = const [];
-  Map<String, SessionStatus> statuses = const {};
-
-  @override
-  Future<Session> createSession(
-    CreateSessionInput input, {
-    CancelToken? cancelToken,
-  }) => throw UnimplementedError();
-
-  @override
-  Future<List<Session>> getSessions({
-    String? directory,
-    String? roots,
-    int? limit,
-    CancelToken? cancelToken,
-  }) async => sessions;
-
-  @override
-  Future<Map<String, SessionStatus>> getSessionStatus({
-    String? directory,
-    String? workspace,
-    CancelToken? cancelToken,
-  }) async => statuses;
-}
+import '../../../support/session_test_support.dart';
 
 void main() {
   group('Session Providers', () {
     test(
       'sessionsListProvider returns sessions sorted by updated descending',
       () async {
-        final fakeRepo = _FakeSessionRepository();
+        final fakeRepo = FakeSessionRepository();
         fakeRepo.sessions = [
           const Session(
             id: 'ses_old',
@@ -83,7 +57,7 @@ void main() {
     );
 
     test('sessionStatusesProvider returns the statuses map', () async {
-      final fakeRepo = _FakeSessionRepository();
+      final fakeRepo = FakeSessionRepository();
       fakeRepo.statuses = {
         'ses_1': const SessionStatus.idle(),
         'ses_2': const SessionStatus.busy(),

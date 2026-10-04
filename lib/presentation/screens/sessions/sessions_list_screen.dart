@@ -13,6 +13,7 @@ import '../../widgets/connection_badge/connection_status.dart';
 import '../../widgets/loading_indicator/loading_indicator.dart';
 import 'new_session_dialog.dart';
 import 'session_tile.dart';
+import 'session_delete_button.dart';
 import 'sessions_empty_view.dart';
 
 /// Screen displaying the list of OpenCode sessions from the connected server.
@@ -91,7 +92,12 @@ class SessionsListScreen extends ConsumerWidget {
                 final session = sessions[index];
                 final sessionStatus =
                     statuses[session.id] ?? const SessionStatus.idle();
-                return SessionTile(session: session, status: sessionStatus);
+                return SessionTile(
+                  key: ValueKey(session.id),
+                  session: session,
+                  status: sessionStatus,
+                  trailing: SessionDeleteButton(session: session),
+                );
               },
             ),
           );
