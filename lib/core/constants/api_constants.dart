@@ -13,8 +13,11 @@ abstract final class ApiConstants {
   /// GET /global/health — server health and version.
   static const String healthPath = '/global/health';
 
-  /// GET /session — list sessions.
+  /// GET /session — list sessions; POST /session — create a session.
   static const String sessionPath = '/session';
+
+  /// GET /agent — available agents.
+  static const String agentPath = '/agent';
 
   /// GET /session/status — live status map for sessions.
   static const String sessionStatusPath = '/session/status';

@@ -10,6 +10,42 @@ class SessionDatasource {
 
   final Dio _dio;
 
+  /// POST [/session](ApiConstants.sessionPath).
+  Future<Session> createSession(
+    CreateSessionInput input, {
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiConstants.sessionPath,
+        data: input.toJson(),
+        cancelToken: cancelToken,
+      );
+      final data = response.data;
+      if (data == null) {
+        throw const ParseException('Empty session creation response');
+      }
+      return Session.fromJson(data);
+    } on DioException catch (error) {
+      final mapped = error.error;
+      if (mapped is AppException) throw mapped;
+      if (mapped is TypeError || mapped is FormatException) {
+        throw ParseException(
+          'Failed to parse session creation response: $mapped',
+          stackTrace: error.stackTrace,
+        );
+      }
+      rethrow;
+    } on AppException {
+      rethrow;
+    } on Object catch (error, st) {
+      throw ParseException(
+        'Failed to parse session creation response: $error',
+        stackTrace: st,
+      );
+    }
+  }
+
   /// GET [/session](ApiConstants.sessionPath).
   Future<List<Session>> getSessions({
     String? directory,

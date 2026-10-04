@@ -158,6 +158,9 @@ sealed class SessionStatus with _$SessionStatus {
 
 @freezed
 sealed class CreateSessionInput with _$CreateSessionInput {
+  // Freezed copies this constructor annotation to the generated DTO class.
+  // ignore: invalid_annotation_target
+  @JsonSerializable(includeIfNull: false)
   const factory CreateSessionInput({
     String? parentID,
     String? title,

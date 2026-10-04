@@ -67,6 +67,15 @@
   },
   "serverHealthUnavailable": "Health information unavailable",
   "sessionsTitle": "Sessions",
+  "newSession": "New session",
+  "sessionTitleLabel": "Title (optional)",
+  "sessionAgentLabel": "Agent (optional)",
+  "serverDefaultAgent": "Server default",
+  "loadingAgents": "Loading agents",
+  "agentsLoadError": "Could not load agents. You can still create a session with the server default.",
+  "createSession": "Create",
+  "creatingSession": "Creating…",
+  "createSessionError": "Could not create the session. Please try again.",
   "viewSessions": "View sessions",
   "noSessionsTitle": "No sessions yet",
   "noSessionsSubtitle": "Pull down to refresh or check server",
@@ -83,4 +92,3 @@
     }
   }
 }
-

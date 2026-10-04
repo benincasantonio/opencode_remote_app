@@ -10,6 +10,12 @@ class _FakeSessionRepository implements SessionRepository {
   Map<String, SessionStatus> statuses = const {};
 
   @override
+  Future<Session> createSession(
+    CreateSessionInput input, {
+    CancelToken? cancelToken,
+  }) => throw UnimplementedError();
+
+  @override
   Future<List<Session>> getSessions({
     String? directory,
     String? roots,
