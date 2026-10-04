@@ -98,16 +98,22 @@ GitHub epic: [#52](https://github.com/benincasantonio/opencode_remote_app/issues
 | **F2.4** Recent sessions on Home | Home dashboard shows recent sessions widget + quick access | [#83](https://github.com/benincasantonio/opencode_remote_app/issues/83) |
 
 Order: F2.1 → F2.2 → F2.3 → F2.4
+
+F2.2 includes optional agent selection: `GET /agent`, a minimal `AgentInfo` DTO,
+and its datasource/repository/providers are introduced here and reused by F3.
+The dialog defaults to the server's agent and still permits creation if agent
+discovery fails. Absent creation options are omitted from the POST body.
+
 Epic acceptance: all four subtickets done; session lifecycle works end-to-end; analyzer + tests pass.
 Depends on F1 (#51) and chat models (#48).
 
 ## F3 - Chat
 
-Goal: Send prompts and view AI responses with live updates. Consumes P4-01 Message/Part models. **Models created here: ServerEvent envelope + typed events (SSE), Config/Provider/Agent models (model & agent selector in the input).**
+Goal: Send prompts and view AI responses with live updates. Consumes P4-01 Message/Part models and F2.2 AgentInfo/agent lookup. **Models created here: ServerEvent envelope + typed events (SSE), Config/Provider models (model & agent selector in the input).**
 Details:
-1. Models: ServerEvent {id, type, properties} union — session.created/updated/deleted, message.updated/removed, message.part.updated/removed/delta, session.status/idle, session.error, server.connected + unknown fallback. AppConfig (subset of ConfigV1), ProviderListResult {all, default, connected}, ProviderInfo + nested Model, AgentInfo (mode subagent|primary|all).
-2. Datasources: message endpoints — GET /session/:id/message (limit/before pagination), POST /session/:id/message, POST /session/:id/prompt_async, POST /session/:id/abort; SSE client on /global/event with reconnect; config endpoints GET /config, GET /provider, GET /config/providers, GET /api/agent.
-3. Repositories: MessageRepository (list, send sync, send async), ConfigRepository (config, providers, agents), event stream handling.
+1. Models: ServerEvent {id, type, properties} union — session.created/updated/deleted, message.updated/removed, message.part.updated/removed/delta, session.status/idle, session.error, server.connected + unknown fallback. AppConfig (subset of ConfigV1), ProviderListResult {all, default, connected}, ProviderInfo + nested Model. Reuse AgentInfo (mode subagent|primary|all) from F2.2.
+2. Datasources: message endpoints — GET /session/:id/message (limit/before pagination), POST /session/:id/message, POST /session/:id/prompt_async, POST /session/:id/abort; SSE client on /global/event with reconnect; config endpoints GET /config, GET /provider, GET /config/providers; reuse F2.2 GET /agent.
+3. Repositories: MessageRepository (list, send sync, send async), ConfigRepository (config, providers), F2.2 AgentRepository, event stream handling.
 4. Providers: messages per session, send action, event stream → invalidate messages/statuses, typing indicator from session status, model/agent options.
 5. UI: ChatScreen, MessageBubble (role header + parts), PartRenderer (text/reasoning/tool/step + generic OtherPart row), ToolCallWidget (expandable, state icons), ChatInput (model/agent selector, busy gating), TypingIndicator, session detail view + abort action.
 Acceptance: Send a prompt and see the streamed response update live; tool calls render with state; typing indicator shows while busy; model/agent selection is sent with the prompt. Analyzer + tests pass.

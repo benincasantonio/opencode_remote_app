@@ -1,8 +1,13 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/datasources/session_datasource.dart';
 import '../../data/models/session.dart';
 import '../../data/repositories/session_repository.dart';
+import 'connection_providers.dart';
 import 'dio_providers.dart';
 
 part 'session_providers.g.dart';
@@ -34,4 +39,40 @@ Future<List<Session>> sessionsList(Ref ref) async {
 Future<Map<String, SessionStatus>> sessionStatuses(Ref ref) async {
   final repository = ref.watch(sessionRepositoryProvider);
   return repository.getSessionStatus();
+}
+
+/// A dialog-scoped action. Rebuilding this provider never repeats a POST.
+@riverpod
+class SessionCreation extends _$SessionCreation {
+  @override
+  FutureOr<Session?> build() {
+    ref.watch(
+      connectionProvider.select((value) => (value.isConnected, value.baseUrl)),
+    );
+    return null;
+  }
+
+  Future<Session?> create(CreateSessionInput input) async {
+    if (state.isLoading) return null;
+
+    // Cancellation also marks requests from an earlier server as obsolete.
+    final requestRef = ref;
+    final token = CancelToken();
+    requestRef.onDispose(token.cancel);
+    state = const AsyncLoading();
+    try {
+      final session = await requestRef
+          .read(sessionRepositoryProvider)
+          .createSession(input, cancelToken: token);
+      if (!requestRef.mounted || token.isCancelled) return null;
+      requestRef.invalidate(sessionsListProvider);
+      state = AsyncData(session);
+      return session;
+    } on Object catch (error, st) {
+      if (requestRef.mounted && !token.isCancelled) {
+        state = AsyncError(error, st);
+      }
+      return null;
+    }
+  }
 }
