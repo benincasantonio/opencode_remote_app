@@ -9,6 +9,9 @@ class SessionRepository {
 
   final SessionDatasource _datasource;
 
+  Future<void> deleteSession(String id, {CancelToken? cancelToken}) =>
+      _datasource.deleteSession(id, cancelToken: cancelToken);
+
   Future<Session> createSession(
     CreateSessionInput input, {
     CancelToken? cancelToken,

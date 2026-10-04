@@ -16,6 +16,15 @@ class _FakeSessionDatasource implements SessionDatasource {
   CancelToken? lastCancelToken;
   CreateSessionInput? lastInput;
   Object? createError;
+  String? lastDeletedId;
+
+  @override
+  Future<void> deleteSession(String id, {CancelToken? cancelToken}) async {
+    lastDeletedId = id;
+    lastCancelToken = cancelToken;
+    final error = createError;
+    if (error != null) throw error;
+  }
 
   @override
   Future<Session> createSession(
@@ -64,6 +73,19 @@ void main() {
     setUp(() {
       fakeDatasource = _FakeSessionDatasource();
       repository = SessionRepository(fakeDatasource);
+    });
+
+    test('deleteSession forwards id, cancellation and errors', () async {
+      final token = CancelToken();
+      await repository.deleteSession('ses_1', cancelToken: token);
+      expect(fakeDatasource.lastDeletedId, 'ses_1');
+      expect(fakeDatasource.lastCancelToken, same(token));
+      const error = NetworkException('offline');
+      fakeDatasource.createError = error;
+      await expectLater(
+        repository.deleteSession('ses_1'),
+        throwsA(same(error)),
+      );
     });
 
     test(

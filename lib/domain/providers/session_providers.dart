@@ -18,6 +18,38 @@ SessionDatasource sessionDatasource(Ref ref) {
   return SessionDatasource(client.dio);
 }
 
+/// Independent state per row prevents repeated deletion requests.
+@riverpod
+class SessionDeletion extends _$SessionDeletion {
+  @override
+  FutureOr<bool> build(String sessionId) {
+    ref.watch(
+      connectionProvider.select((value) => (value.isConnected, value.baseUrl)),
+    );
+    return false;
+  }
+
+  Future<bool?> delete() async {
+    if (state.isLoading || state.value == true) return null;
+    final requestRef = ref;
+    final token = CancelToken();
+    requestRef.onDispose(token.cancel);
+    state = const AsyncLoading();
+    final result = await AsyncValue.guard(() async {
+      await requestRef
+          .read(sessionRepositoryProvider)
+          .deleteSession(sessionId, cancelToken: token);
+      return true;
+    });
+    if (!requestRef.mounted || token.isCancelled) return null;
+    state = result;
+    if (result.hasError) return false;
+    requestRef.invalidate(sessionsListProvider);
+    requestRef.invalidate(sessionStatusesProvider);
+    return true;
+  }
+}
+
 @Riverpod(keepAlive: true)
 SessionRepository sessionRepository(Ref ref) {
   return SessionRepository(ref.watch(sessionDatasourceProvider));

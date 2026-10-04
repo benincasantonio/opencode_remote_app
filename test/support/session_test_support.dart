@@ -36,6 +36,22 @@ class TestConnection extends Connection {
 
 class FakeSessionRepository implements SessionRepository {
   List<Session> sessions = [];
+  Map<String, SessionStatus> statuses = {};
+  final deletedIds = <String>[];
+  Object? deleteError;
+  Future<void>? pendingDeletion;
+  CancelToken? deletionToken;
+
+  @override
+  Future<void> deleteSession(String id, {CancelToken? cancelToken}) async {
+    deletedIds.add(id);
+    deletionToken = cancelToken;
+    final error = deleteError;
+    if (error != null) throw error;
+    await pendingDeletion;
+    sessions = sessions.where((session) => session.id != id).toList();
+  }
+
   final inputs = <CreateSessionInput>[];
   Object? createError;
   Object? listError;
@@ -75,5 +91,5 @@ class FakeSessionRepository implements SessionRepository {
     String? directory,
     String? workspace,
     CancelToken? cancelToken,
-  }) async => {};
+  }) async => statuses;
 }

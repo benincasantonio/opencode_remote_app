@@ -10,6 +10,22 @@ enum AgentPreviewState { ready, loading, error, empty }
 
 enum CreationPreviewState { success, loading, error }
 
+class PreviewSessionDeletion extends SessionDeletion {
+  PreviewSessionDeletion(this.result);
+  final CreationPreviewState result;
+
+  @override
+  Future<bool?> delete() async {
+    state = const AsyncLoading();
+    if (result == CreationPreviewState.loading) return null;
+    final success = result == CreationPreviewState.success;
+    state = success
+        ? const AsyncData(true)
+        : AsyncError(const NetworkException('Preview error'), StackTrace.empty);
+    return success;
+  }
+}
+
 FutureOr<List<AgentInfo>> previewAgents(AgentPreviewState state) =>
     switch (state) {
       AgentPreviewState.ready => const [
