@@ -35,44 +35,53 @@ void main() {
   });
 
   group('DioClient auth', () {
-    test('adds Basic Authorization header when credentials provided', () async {
-      final client = DioClient(
-        baseUrl: 'http://example.com',
-        username: 'user',
-        password: 'pass',
-        enableLogging: false,
-      );
-      addTearDown(client.dispose);
+    for (final (username, password, credentials) in <(String?, String, String)>[
+      ('user', 'pass', 'user:pass'),
+      (null, 'pass', 'opencode:pass'),
+      ('', 'pass', 'opencode:pass'),
+      (' ', ' ', ' : '),
+    ]) {
+      test('encodes ${jsonEncode(username)} username with password', () async {
+        final client = DioClient(
+          baseUrl: 'http://example.com',
+          username: username,
+          password: password,
+          enableLogging: false,
+        );
+        addTearDown(client.dispose);
+        client.dio.httpClientAdapter = _Adapter(_jsonResponse);
 
-      RequestOptions? captured;
-      client.dio.httpClientAdapter = _Adapter((options) {
-        captured = options;
-        return _jsonResponse(options);
+        final response = await client.dio.get<dynamic>('/health');
+
+        expect(
+          response.requestOptions.headers['authorization'],
+          'Basic ${base64Encode(utf8.encode(credentials))}',
+        );
       });
+    }
 
-      await client.dio.get<dynamic>('/health');
+    for (final username in <String?>[null, '', 'user']) {
+      for (final password in <String?>[null, '']) {
+        test('omits auth for username ${jsonEncode(username)} '
+            'and password ${jsonEncode(password)}', () async {
+          final client = DioClient(
+            baseUrl: 'http://example.com',
+            username: username,
+            password: password,
+            enableLogging: false,
+          );
+          addTearDown(client.dispose);
+          client.dio.httpClientAdapter = _Adapter(_jsonResponse);
 
-      final expected = 'Basic ${base64Encode(utf8.encode('user:pass'))}';
-      expect(captured?.headers['authorization'], expected);
-    });
+          final response = await client.dio.get<dynamic>('/health');
 
-    test('omits Authorization header when credentials absent', () async {
-      final client = DioClient(
-        baseUrl: 'http://example.com',
-        enableLogging: false,
-      );
-      addTearDown(client.dispose);
-
-      RequestOptions? captured;
-      client.dio.httpClientAdapter = _Adapter((options) {
-        captured = options;
-        return _jsonResponse(options);
-      });
-
-      await client.dio.get<dynamic>('/health');
-
-      expect(captured?.headers.containsKey('authorization'), isFalse);
-    });
+          expect(
+            response.requestOptions.headers.containsKey('authorization'),
+            isFalse,
+          );
+        });
+      }
+    }
 
     test('updateCredentials changes the Authorization header', () async {
       final client = DioClient(
@@ -80,55 +89,33 @@ void main() {
         enableLogging: false,
       );
       addTearDown(client.dispose);
+      client.dio.httpClientAdapter = _Adapter(_jsonResponse);
 
-      client.updateCredentials(username: 'alice', password: 'secret');
-      RequestOptions? first;
-      client.dio.httpClientAdapter = _Adapter((options) {
-        first = options;
-        return _jsonResponse(options);
-      });
-      await client.dio.get<dynamic>('/a');
-      expect(
-        first?.headers['authorization'],
-        'Basic ${base64Encode(utf8.encode('alice:secret'))}',
-      );
+      for (final (username, password, credentials)
+          in <(String?, String, String)>[
+            ('alice', 'secret', 'alice:secret'),
+            (null, 'pass', 'opencode:pass'),
+            ('bob', 'other', 'bob:other'),
+            ('', 'pass', 'opencode:pass'),
+          ]) {
+        client.updateCredentials(username: username, password: password);
+        final response = await client.dio.get<dynamic>('/health');
 
-      client.updateCredentials(username: 'bob', password: 'other');
-      RequestOptions? second;
-      client.dio.httpClientAdapter = _Adapter((options) {
-        second = options;
-        return _jsonResponse(options);
-      });
-      await client.dio.get<dynamic>('/b');
-      expect(
-        second?.headers['authorization'],
-        'Basic ${base64Encode(utf8.encode('bob:other'))}',
-      );
+        expect(
+          response.requestOptions.headers['authorization'],
+          'Basic ${base64Encode(utf8.encode(credentials))}',
+        );
+      }
     });
 
-    test('updateCredentials(null) clears Authorization header', () async {
-      final client = DioClient(
-        baseUrl: 'http://example.com',
-        username: 'user',
-        password: 'pass',
-        enableLogging: false,
-      );
-      addTearDown(client.dispose);
-
-      client.updateCredentials();
-      RequestOptions? captured;
-      client.dio.httpClientAdapter = _Adapter((options) {
-        captured = options;
-        return _jsonResponse(options);
-      });
-      await client.dio.get<dynamic>('/health');
-
-      expect(captured?.headers.containsKey('authorization'), isFalse);
-    });
-
-    test(
-      'updateCredentials with empty strings clears Authorization header',
-      () async {
+    for (final (username, password) in <(String?, String?)>[
+      (null, null),
+      ('', ''),
+      ('user', null),
+      ('user', ''),
+    ]) {
+      test('updateCredentials clears auth for username ${jsonEncode(username)} '
+          'and password ${jsonEncode(password)}', () async {
         final client = DioClient(
           baseUrl: 'http://example.com',
           username: 'user',
@@ -136,18 +123,27 @@ void main() {
           enableLogging: false,
         );
         addTearDown(client.dispose);
+        client.dio.httpClientAdapter = _Adapter(_jsonResponse);
 
-        client.updateCredentials(username: '', password: '');
-        RequestOptions? captured;
-        client.dio.httpClientAdapter = _Adapter((options) {
-          captured = options;
-          return _jsonResponse(options);
-        });
-        await client.dio.get<dynamic>('/health');
+        final first = await client.dio.get<dynamic>('/health');
+        final authorization = first.requestOptions.headers['authorization'];
+        expect(
+          authorization,
+          'Basic ${base64Encode(utf8.encode('user:pass'))}',
+        );
 
-        expect(captured?.headers.containsKey('authorization'), isFalse);
-      },
-    );
+        client.updateCredentials(username: username, password: password);
+        final second = await client.dio.get<dynamic>(
+          '/health',
+          options: Options(headers: {'Authorization': authorization}),
+        );
+
+        expect(
+          second.requestOptions.headers.containsKey('authorization'),
+          isFalse,
+        );
+      });
+    }
   });
 
   group('DioClient errors', () {

@@ -53,7 +53,8 @@ class DioClient {
 
   /// Sets or clears Basic auth credentials.
   ///
-  /// [username] / [password] of `null` or empty string clear the auth header.
+  /// A null or empty [password] clears the auth header. Otherwise, a null or
+  /// empty [username] defaults to `opencode`.
   void updateCredentials({String? username, String? password}) {
     _authInterceptor.updateCredentials(username: username, password: password);
   }
@@ -120,11 +121,11 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (_username == null && _password == null) {
+    if (_password == null) {
       options.headers.remove(_authorizationHeader);
     } else {
       final token = base64Encode(
-        utf8.encode('${_username ?? ''}:${_password ?? ''}'),
+        utf8.encode('${_username ?? 'opencode'}:$_password'),
       );
       options.headers[_authorizationHeader] = 'Basic $token';
     }
