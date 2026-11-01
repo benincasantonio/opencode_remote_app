@@ -3,13 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:opencode_remote_app/core/errors/errors.dart';
 import 'package:opencode_remote_app/data/models/server_health.dart';
 import 'package:opencode_remote_app/data/models/session.dart';
 import 'package:opencode_remote_app/domain/providers/connection_providers.dart';
+import 'package:opencode_remote_app/domain/providers/message_providers.dart';
 import 'package:opencode_remote_app/domain/providers/server_providers.dart';
 import 'package:opencode_remote_app/domain/providers/session_providers.dart';
 import 'package:opencode_remote_app/l10n/app_localizations.dart';
+import 'package:opencode_remote_app/presentation/router/app_router.dart';
+import 'package:opencode_remote_app/presentation/screens/chat/chat_screen.dart';
 import 'package:opencode_remote_app/presentation/screens/sessions/session_tile.dart';
 import 'package:opencode_remote_app/presentation/screens/sessions/sessions_empty_view.dart';
 import 'package:opencode_remote_app/presentation/screens/sessions/sessions_list_screen.dart';
@@ -17,6 +21,8 @@ import 'package:opencode_remote_app/presentation/widgets/app_bar/terminal_app_ba
 import 'package:opencode_remote_app/presentation/widgets/app_error_widget/app_error_widget.dart';
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
 import 'package:opencode_remote_app/presentation/widgets/loading_indicator/loading_indicator.dart';
+
+import '../../../../support/message_test_support.dart';
 
 void main() {
   const healthy = ServerHealth(healthy: true, version: '1.0.0');
@@ -172,6 +178,55 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(RefreshIndicator), findsOneWidget);
+    });
+
+    testWidgets('tapping a session opens its transcript', (tester) async {
+      final router = GoRouter(
+        initialLocation: sessionsPath,
+        routes: [
+          GoRoute(
+            path: sessionsPath,
+            builder: (_, _) => const SessionsListScreen(),
+            routes: [
+              GoRoute(
+                path: ':sessionId',
+                builder: (_, state) => ChatScreen(
+                  sessionId: state.pathParameters['sessionId'] ?? '',
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            connectionProvider.overrideWithValue(connectedState()),
+            healthPollingProvider.overrideWith((ref) => Stream.value(healthy)),
+            sessionsListProvider.overrideWith((ref) async => sampleSessions),
+            sessionStatusesProvider.overrideWith(
+              (ref) async => const <String, SessionStatus>{},
+            ),
+            messagesProvider.overrideWith(EmptyTranscriptMessages.new),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('First session'));
+      await tester.pumpAndSettle();
+
+      expect(router.state.uri.path, sessionTranscriptPath('ses_1'));
+      expect(find.byType(ChatScreen), findsOneWidget);
+      expect(find.text('No messages yet'), findsOneWidget);
     });
   });
 }

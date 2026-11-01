@@ -109,6 +109,20 @@ Depends on F1 (#51) and chat models (#48).
 
 ## F3 - Chat
 
+GitHub epic: [#53](https://github.com/benincasantonio/opencode_remote_app/issues/53). Split into **user-value** subtickets (not layer tickets). Consumes P4-01 Message/Part models and F2.2 AgentInfo. Leave #53 open until every subticket is done.
+
+| Sub | User value | Issue |
+|---|---|---|
+| **F3.1** Read a session transcript | Open a session and read its messages, oldest at the top | [#90](https://github.com/benincasantonio/opencode_remote_app/issues/90) |
+| **F3.2** Send a sync prompt | Send a prompt and append the reply | |
+| **F3.3** Live updates | SSE updates and a typing indicator | |
+| **F3.4** Tool calls and reasoning | Tool-call cards and reasoning | |
+| **F3.5** Model, agent, and abort | Model/agent selector and abort | |
+
+Order: F3.1 → F3.2 → F3.3 → F3.4 → F3.5.
+
+F3.1 is read-only (`GET /session/:id/message`, transcript UI, navigation from Home and the sessions list). Send, SSE, tool cards, and the model/agent selector land in the later subtickets. The epic goal below still describes finished chat.
+
 Goal: Send prompts and view AI responses with live updates. Consumes P4-01 Message/Part models and F2.2 AgentInfo/agent lookup. **Models created here: ServerEvent envelope + typed events (SSE), Config/Provider models (model & agent selector in the input).**
 Details:
 1. Models: ServerEvent {id, type, properties} union — session.created/updated/deleted, message.updated/removed, message.part.updated/removed/delta, session.status/idle, session.error, server.connected + unknown fallback. AppConfig (subset of ConfigV1), ProviderListResult {all, default, connected}, ProviderInfo + nested Model. Reuse AgentInfo (mode subagent|primary|all) from F2.2.

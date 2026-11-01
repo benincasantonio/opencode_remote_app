@@ -93,6 +93,28 @@
   "sessionStatusIdle": "Idle",
   "sessionStatusBusy": "Busy",
   "sessionStatusRetry": "Retry",
+  "chatEmptyTitle": "No messages yet",
+  "chatEmptySubtitle": "This session has no messages.",
+  "chatErrorTitle": "Could not load messages",
+  "loadEarlier": "Load earlier",
+  "loadEarlierError": "Could not load earlier messages",
+  "messageRoleUser": "You",
+  "messageRoleAssistant": "Assistant",
+  "toolStatusPending": "Pending",
+  "toolStatusRunning": "Running",
+  "toolStatusCompleted": "Completed",
+  "toolStatusError": "Error",
+  "toolPartLine": "{tool} · {status}",
+  "@toolPartLine": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "sessionUpdatedAgo": "Updated {timeAgo}",
   "@sessionUpdatedAgo": {
     "placeholders": {

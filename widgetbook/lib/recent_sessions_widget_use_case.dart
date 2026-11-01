@@ -61,6 +61,7 @@ Widget recentSessionsWidget(BuildContext context) {
       child: RecentSessionsWidget(
         onViewAll: () => context.showSnackBar(context.l10n.viewAllSessions),
         onNewSession: () => context.showSnackBar(context.l10n.newSession),
+        onOpenSession: (session) => context.showSnackBar(session.title),
       ),
     ),
   );

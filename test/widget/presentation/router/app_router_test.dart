@@ -5,6 +5,7 @@ import 'package:opencode_remote_app/app.dart';
 import 'package:opencode_remote_app/data/models/server_health.dart';
 import 'package:opencode_remote_app/domain/providers/connection_providers.dart';
 import 'package:opencode_remote_app/domain/providers/discovery_providers.dart';
+import 'package:opencode_remote_app/domain/providers/message_providers.dart';
 import 'package:opencode_remote_app/domain/providers/server_providers.dart';
 import 'package:opencode_remote_app/domain/providers/session_providers.dart';
 import 'package:opencode_remote_app/presentation/router/app_router.dart';
@@ -12,6 +13,8 @@ import 'package:opencode_remote_app/presentation/widgets/app_button/app_button.d
 import 'package:opencode_remote_app/presentation/widgets/connection_badge/connection_status.dart';
 import 'package:opencode_remote_app/services/discovered_server.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../support/message_test_support.dart';
 
 void main() {
   setUp(() {
@@ -135,6 +138,22 @@ void main() {
     expect(router.state.uri.path, sessionsPath);
     expect(find.text('Sessions'), findsOneWidget);
   });
+
+  testWidgets('GoRouter redirects a transcript to /connect when disconnected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_TestApp(overrides: const []));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(MaterialApp));
+    final router = ProviderScope.containerOf(context).read(appRouterProvider);
+
+    router.go(sessionTranscriptPath('ses_1'));
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.path, connectPath);
+    expect(find.text('Host'), findsOneWidget);
+  });
 }
 
 class _TestApp extends StatelessWidget {
@@ -151,6 +170,7 @@ class _TestApp extends StatelessWidget {
         ),
         sessionsListProvider.overrideWith((ref) => Future.value([])),
         sessionStatusesProvider.overrideWith((ref) => Future.value({})),
+        messagesProvider.overrideWith(EmptyTranscriptMessages.new),
         ...overrides,
       ],
       child: const App(),
