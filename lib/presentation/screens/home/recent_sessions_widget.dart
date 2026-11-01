@@ -5,6 +5,7 @@ import '../../../core/constants/app_sizing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/context_extensions.dart';
 import '../../../core/utils/datetime_extensions.dart';
+import '../../../data/models/session.dart';
 import '../../../domain/providers/session_providers.dart';
 import '../../widgets/app_button/app_button.dart';
 import '../../widgets/app_button/app_button_variant.dart';
@@ -16,10 +17,12 @@ class RecentSessionsWidget extends ConsumerWidget {
     super.key,
     required this.onViewAll,
     required this.onNewSession,
+    required this.onOpenSession,
   });
 
   final VoidCallback onViewAll;
   final VoidCallback onNewSession;
+  final ValueChanged<Session> onOpenSession;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,6 +63,7 @@ class RecentSessionsWidget extends ConsumerWidget {
                       ListTile(
                         key: ValueKey(session.id),
                         contentPadding: EdgeInsets.zero,
+                        onTap: () => onOpenSession(session),
                         title: Text(
                           session.title.trim().isEmpty
                               ? session.slug

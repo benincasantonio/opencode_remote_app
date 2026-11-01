@@ -16,6 +16,13 @@ abstract final class ApiConstants {
   /// GET /session — list sessions; POST /session — create a session.
   static const String sessionPath = '/session';
 
+  /// GET /session/:id/message — one page of a session transcript.
+  static String messagePath(String sessionId) =>
+      '$sessionPath/${Uri.encodeComponent(sessionId)}/message';
+
+  /// Page size for [messagePath]. A full page can load older messages.
+  static const int messagePageLimit = 50;
+
   /// GET /agent — available agents.
   static const String agentPath = '/agent';
 

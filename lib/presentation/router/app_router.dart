@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/providers/connection_providers.dart';
+import '../screens/chat/chat_screen.dart';
 import '../screens/connect/connect_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/sessions/sessions_list_screen.dart';
@@ -17,6 +18,10 @@ const homePath = '/home';
 
 /// Path for the sessions list screen.
 const sessionsPath = '/sessions';
+
+/// Path for the read-only transcript of [sessionId].
+String sessionTranscriptPath(String sessionId) =>
+    '$sessionsPath/${Uri.encodeComponent(sessionId)}';
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
@@ -49,6 +54,15 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: sessionsPath,
         builder: (context, state) => const SessionsListScreen(),
+        routes: [
+          GoRoute(
+            path: ':sessionId',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['sessionId'] ?? '';
+              return ChatScreen(sessionId: sessionId);
+            },
+          ),
+        ],
       ),
     ],
   );

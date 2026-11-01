@@ -16,6 +16,7 @@ Feature-first execution: each feature is a vertical slice (models → datasource
 - Recent sessions on Home.
 
 ## F3 — Chat
+- F3.1 reads a session transcript (oldest at the top) before send, SSE, tool cards, and model/agent selection.
 - Prompt send (sync + async), live SSE updates, parts rendering, tool call cards, typing indicator, model/agent selector.
 - SSE event models + config/provider/agent models created here.
 

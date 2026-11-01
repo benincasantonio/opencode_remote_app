@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_sizing.dart';
 import '../../../core/utils/context_extensions.dart';
@@ -7,6 +8,7 @@ import '../../../data/models/session.dart';
 import '../../../domain/providers/connection_providers.dart';
 import '../../../domain/providers/server_providers.dart';
 import '../../../domain/providers/session_providers.dart';
+import '../../router/app_router.dart';
 import '../../widgets/app_bar/terminal_app_bar.dart';
 import '../../widgets/app_error_widget/app_error_widget.dart';
 import '../../widgets/connection_badge/connection_status.dart';
@@ -96,6 +98,7 @@ class SessionsListScreen extends ConsumerWidget {
                   key: ValueKey(session.id),
                   session: session,
                   status: sessionStatus,
+                  onTap: () => context.push(sessionTranscriptPath(session.id)),
                   trailing: SessionDeleteButton(session: session),
                 );
               },

@@ -9,16 +9,19 @@ import 'package:opencode_remote_app/core/theme/app_theme.dart';
 import 'package:opencode_remote_app/data/models/session.dart';
 import 'package:opencode_remote_app/domain/providers/agent_providers.dart';
 import 'package:opencode_remote_app/domain/providers/connection_providers.dart';
+import 'package:opencode_remote_app/domain/providers/message_providers.dart';
 import 'package:opencode_remote_app/domain/providers/server_providers.dart';
 import 'package:opencode_remote_app/domain/providers/session_providers.dart';
 import 'package:opencode_remote_app/l10n/app_localizations.dart';
 import 'package:opencode_remote_app/presentation/router/app_router.dart';
+import 'package:opencode_remote_app/presentation/screens/chat/chat_screen.dart';
 import 'package:opencode_remote_app/presentation/screens/home/home_screen.dart';
 import 'package:opencode_remote_app/presentation/screens/home/recent_sessions_widget.dart';
 import 'package:opencode_remote_app/presentation/screens/home/server_status_widget.dart';
 import 'package:opencode_remote_app/presentation/screens/sessions/new_session_dialog.dart';
 import 'package:opencode_remote_app/presentation/screens/sessions/sessions_list_screen.dart';
 
+import '../../../../support/message_test_support.dart';
 import '../../../../support/session_test_support.dart';
 
 Future<GoRouter> _pumpHome(
@@ -33,6 +36,13 @@ Future<GoRouter> _pumpHome(
       GoRoute(
         path: sessionsPath,
         builder: (_, _) => const SessionsListScreen(),
+        routes: [
+          GoRoute(
+            path: ':sessionId',
+            builder: (_, state) =>
+                ChatScreen(sessionId: state.pathParameters['sessionId'] ?? ''),
+          ),
+        ],
       ),
     ],
   );
@@ -45,6 +55,7 @@ Future<GoRouter> _pumpHome(
         healthPollingProvider.overrideWith((ref) => Stream.value(testHealth)),
         sessionRepositoryProvider.overrideWithValue(repository),
         sessionAgentsProvider.overrideWith((ref) async => []),
+        messagesProvider.overrideWith(EmptyTranscriptMessages.new),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -151,6 +162,16 @@ void main() {
     expect(find.byType(SessionsListScreen), findsOneWidget);
     expect(find.text(createdSession.title), findsOneWidget);
     expect(repository.listCalls, 1);
+  });
+
+  testWidgets('tapping a recent session opens its transcript', (tester) async {
+    repository.sessions = [createdSession];
+    final router = await _pumpHome(tester, repository);
+    await tester.tap(find.text(createdSession.title));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, sessionTranscriptPath(createdSession.id));
+    expect(find.byType(ChatScreen), findsOneWidget);
+    expect(find.text('No messages yet'), findsOneWidget);
   });
 
   testWidgets(

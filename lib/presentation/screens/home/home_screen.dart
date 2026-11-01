@@ -63,6 +63,8 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: AppSizing.gapLarge),
             RecentSessionsWidget(
               onViewAll: () => context.push(sessionsPath),
+              onOpenSession: (session) =>
+                  context.push(sessionTranscriptPath(session.id)),
               onNewSession: () => showDialog<Session>(
                 context: context,
                 barrierDismissible: false,
